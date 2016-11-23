@@ -146,6 +146,9 @@ static uint16_t calc_timer1_reload_val(uint32_t prescaler)
 
 void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void)
 {
+    TMR1 = timer1_reload_value;
+    IFS0bits.T1IF = 0;
+
     ++current_time;
     
     if (10 == ++prescaler_10ms)
