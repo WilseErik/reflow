@@ -6,6 +6,7 @@
 
 #include "gpio.h"
 #include "uart.h"
+#include "timers.h"
 
 // =============================================================================
 // Private type definitions
@@ -39,6 +40,8 @@ void init(void)
     uart_write_string("Reflow oven controller v1.0\n\r");
     uart_write_string("Last compiled nov 2016\n\r");
     uart_write_string("Type 'help' for help.\n\r");
+
+    timers_start_msec_timer();
 }
 
 // =============================================================================

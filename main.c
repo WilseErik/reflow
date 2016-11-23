@@ -57,6 +57,11 @@ int main(void)
             status_clear(STATUS_UPDATE_LCD_FLAG);
             // Start update of display
         }
+        else if (status_check(STATUS_UART_LOG_TEMP_FLAG))
+        {
+            status_clear(STATUS_UART_LOG_TEMP_FLAG);
+            // Write current temp over UART
+        }
         else if (status_check(STATUS_UART_RECEIVE_FLAG))
         {
             status_clear(STATUS_UART_RECEIVE_FLAG);

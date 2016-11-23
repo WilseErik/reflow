@@ -23,6 +23,7 @@ typedef enum
     STATUS_READ_SECOND_TEMP_FLAG,
     STATUS_RUN_PID_FLAG,
     STATUS_UPDATE_LCD_FLAG,
+    STATUS_UART_LOG_TEMP_FLAG,
     STATUS_BYTE_LAST
 } status_byte_index_t;
 
