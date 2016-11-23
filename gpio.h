@@ -59,13 +59,13 @@ extern "C" {
 //
 // Buttons
 //
-#define START_BUTTON_PIN            PORTDbits.PORTD8
+#define START_BUTTON_PIN            PORTDbits.RD9
 #define START_BUTTON_DIR            TRISDbits.TRISD8
 
-#define STOP_BUTTON_PIN             PORTDbits.PORTD9
+#define STOP_BUTTON_PIN             PORTDbits.RD9
 #define STOP_BUTTON_DIR             TRISDbits.TRISD9
 
-#define LEAD_SWITCH_PIN             PORTDbits.PORTD10
+#define LEAD_SWITCH_PIN             PORTDbits.RD10
 #define LEAD_SWITCH_DIR             TRISDbits.TRISD10
 
 //

@@ -7,6 +7,7 @@
 #include "gpio.h"
 #include "uart.h"
 #include "timers.h"
+#include "buttons.h"
 
 // =============================================================================
 // Private type definitions
@@ -41,6 +42,7 @@ void init(void)
     uart_write_string("Last compiled nov 2016\n\r");
     uart_write_string("Type 'help' for help.\n\r");
 
+    buttons_init();
     timers_start_msec_timer();
 }
 

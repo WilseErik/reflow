@@ -6,6 +6,7 @@
 #include "init.h"
 #include "status.h"
 #include "gpio.h"
+#include "buttons.h"
 
 // =============================================================================
 // Private type definitions
@@ -37,7 +38,12 @@ int main(void)
 
     while (1)
     {
-        if (status_check(STATUS_RUN_PID_FLAG))
+        if (status_check(STATUS_STOP_BUTTON_PUSHED_FLAG))
+        {
+            status_clear(STATUS_STOP_BUTTON_PUSHED_FLAG);
+            buttons_stop_pushed();
+        }
+        else if (status_check(STATUS_RUN_PID_FLAG))
         {
             status_clear(STATUS_RUN_PID_FLAG);
             // Run pid
@@ -66,6 +72,11 @@ int main(void)
         {
             status_clear(STATUS_UART_RECEIVE_FLAG);
             DEBUG_1_LED_PIN = !DEBUG_1_LED_PIN;
+        }
+        else if (status_check(STATUS_START_BUTTON_PUSHED_FLAG))
+        {
+            status_clear(STATUS_START_BUTTON_PUSHED_FLAG);
+            buttons_start_pushed();
         }
     }
 
