@@ -7,6 +7,7 @@
 #include "status.h"
 #include "gpio.h"
 #include "buttons.h"
+#include "max6675.h"
 
 // =============================================================================
 // Private type definitions
@@ -43,20 +44,24 @@ int main(void)
             status_clear(STATUS_STOP_BUTTON_PUSHED_FLAG);
             buttons_stop_pushed();
         }
+        else if (status_check(STATUS_CRITICAL_ERROR_FLAG))
+        {
+            status_clear(STATUS_CRITICAL_ERROR_FLAG);
+
+            while (1)
+            {
+                HEATER_OFF;
+            }
+        }
         else if (status_check(STATUS_RUN_PID_FLAG))
         {
             status_clear(STATUS_RUN_PID_FLAG);
             // Run pid
         }
-        else if (status_check(STATUS_READ_FIRST_TEMP_FLAG))
+        else if (status_check(STATUS_START_TEMP_READING_FLAG))
         {
-            status_clear(STATUS_READ_FIRST_TEMP_FLAG);
-            // Start sensor reading
-        }
-        else if (status_check(STATUS_READ_SECOND_TEMP_FLAG))
-        {
-            status_clear(STATUS_READ_SECOND_TEMP_FLAG);
-            // Start sensor reading
+            status_clear(STATUS_START_TEMP_READING_FLAG);
+            max6675_start_temp_reading();
         }
         else if (status_check(STATUS_UPDATE_LCD_FLAG))
         {

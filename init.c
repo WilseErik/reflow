@@ -8,6 +8,7 @@
 #include "uart.h"
 #include "timers.h"
 #include "buttons.h"
+#include "max6675.h"
 
 // =============================================================================
 // Private type definitions
@@ -43,6 +44,7 @@ void init(void)
     uart_write_string("Type 'help' for help.\n\r");
 
     buttons_init();
+    max6675_init();
     timers_start_msec_timer();
 }
 

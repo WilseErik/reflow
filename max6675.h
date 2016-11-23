@@ -9,6 +9,9 @@ extern "C" {
 // Include statements
 // =============================================================================
 
+#include <stdbool.h>
+#include <stdint.h>
+    
 // =============================================================================
 // Public type definitions
 // =============================================================================
@@ -24,6 +27,23 @@ extern "C" {
 // =============================================================================
 // Public function declarations
 // =============================================================================
+
+/**
+ * @brief Initializes the max6675 interfaces.
+ */
+void max6675_init(void);
+
+/**
+ * @brief Starts a temperature reading using the two max6675 ICs.
+ * @details The reading is done asynchronously.
+ */
+void max6675_start_temp_reading(void);
+
+/**
+ * @brief  The current filtered temperature.
+ * @return current filtered temperature in degrees celcius * 4.
+ */
+uint16_t max6675_get_current_temp(void);
 
 #ifdef	__cplusplus
 }

@@ -155,7 +155,7 @@ void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void)
     {
         prescaler_10ms = 0;
 
-        status_set(STATUS_READ_FIRST_TEMP_FLAG, true);
+        status_set(STATUS_START_TEMP_READING_FLAG, true);
         status_set(STATUS_RUN_PID_FLAG, true);
     }
 
