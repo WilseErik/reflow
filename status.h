@@ -33,7 +33,8 @@ typedef enum
 {
     CRIT_ERR_LOOSE_THERMOCOUPLE,
     CRIT_ERR_INVALID_TEMP_READING,
-    CRIT_ERR_OVERTEMP
+    CRIT_ERR_OVERTEMP,
+    CRIT_ERR_READ_TIMEOUT,
 } critical_error_t;
 
 typedef bool status_item_t;

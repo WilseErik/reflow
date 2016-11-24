@@ -12,6 +12,7 @@
 
 #include "gpio.h"
 #include "status.h"
+#include "timers.h"
 
 // =============================================================================
 // Private type definitions
@@ -58,9 +59,18 @@ static volatile uint16_t ic2_reading;
 
 static volatile filter_buffer_t filter_buffer;
 
+static volatile uint32_t last_reading_timestamp;
+static volatile bool first_reading_complete = false;
+
 // =============================================================================
 // Private function declarations
 // =============================================================================
+
+/**
+ * @Brief Adds one temperature reading to the filter buffer.
+ * @param temp - reading to add.
+ */
+static void add_reading(uint16_t temp);
 
 // =============================================================================
 // Public function definitions
@@ -94,6 +104,9 @@ void max6675_init(void)
     read_state = READ_STATE_IDLE;
 
     memset(&filter_buffer, 0, sizeof(filter_buffer));
+
+    first_reading_complete = false;
+    last_reading_timestamp = 0;
 
     IFS0bits.SPI1IF = 0;
     IEC0bits.SPI1IE = 1;
@@ -143,6 +156,27 @@ uint16_t max6675_get_current_temp(void)
     return filter_buffer.mean;
 }
 
+uint32_t max6675_get_last_reading_time(void)
+{
+    uint32_t t1;
+    uint32_t t2;
+
+    // Avoid that _SPI1Interrupt preempts and changes last_reading_timestamp
+    // during an assignment.
+    do
+    {
+        t1 = last_reading_timestamp;
+        t2 = last_reading_timestamp;
+    } while (t1 != t2);
+
+    return t1;
+}
+
+bool max6675_first_reading_done(void)
+{
+    return first_reading_complete;
+}
+
 // =============================================================================
 // Private function definitions
 // =============================================================================
@@ -182,6 +216,9 @@ static void add_reading(uint16_t temp)
         filter_buffer.sum += temp;
         filter_buffer.mean = filter_buffer.sum / filter_buffer.size;
     }
+
+    last_reading_timestamp = timers_get_millis(void);
+    first_reading_complete = true;
 
     if (filter_buffer.mean > MAX_TEMPERATURE * 4)
     {

@@ -45,6 +45,19 @@ void max6675_start_temp_reading(void);
  */
 uint16_t max6675_get_current_temp(void);
 
+/**
+ * @brief Gets the timestamp of when the last reading was completed.
+ * @return timestamp of last reading completion timestamp.
+ */
+uint32_t max6675_get_last_reading_time(void);
+
+/**
+ * @brief Checks if the first reading since startup has been made.
+ * @details If a reading has been made there is a valid last reading time.
+ * @return true if at least one reading as been done since startup.
+ */
+bool max6675_first_reading_done(void);
+
 #ifdef	__cplusplus
 }
 #endif
