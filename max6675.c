@@ -103,7 +103,7 @@ void max6675_init(void)
 {
     read_state = READ_STATE_IDLE;
 
-    memset(&filter_buffer, 0, sizeof(filter_buffer));
+    memset((filter_buffer_t*)&filter_buffer, 0, sizeof(filter_buffer));
 
     first_reading_complete = false;
     last_reading_timestamp = 0;
@@ -217,7 +217,7 @@ static void add_reading(uint16_t temp)
         filter_buffer.mean = filter_buffer.sum / filter_buffer.size;
     }
 
-    last_reading_timestamp = timers_get_millis(void);
+    last_reading_timestamp = timers_get_millis();
     first_reading_complete = true;
 
     if (filter_buffer.mean > MAX_TEMPERATURE * 4)
@@ -245,6 +245,9 @@ void __attribute__((interrupt, no_auto_psv)) _SPI1Interrupt(void)
             ic2_reading = SPI1BUF;
             read_state = READ_STATE_IDLE;
             parse_read_values = true;
+            break;
+
+        case READ_STATE_IDLE:
             break;
     }
 

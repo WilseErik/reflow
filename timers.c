@@ -42,9 +42,6 @@ static uint32_t MSEC_TIMER_FREQ_HZ = 1000;
 // =============================================================================
 // Private variables
 // =============================================================================
-
-static volatile uint16_t timer1_reload_value = 0;
-
 static volatile uint16_t prescaler_10ms = 0;
 static volatile uint16_t prescaler_250ms = 0;
 
@@ -92,22 +89,22 @@ void timers_start_msec_timer(void)
     if ((counts / 1) < UINT16_MAX)
     {
         T1CONbits.TCKPS = TCKPS_ONE_TO_ONE_PRESCALE;
-        timer1_reload_value = calc_timer1_reload_val(1);
+        PR1 = counts / 1;
     }
     else if ((counts / 8) < UINT16_MAX)
     {
         T1CONbits.TCKPS = TCKPS_ONE_TO_EIGHT_PRESCALE;
-        timer1_reload_value = calc_timer1_reload_val(8);
+        PR1 = counts / 8;
     }
     else if ((counts / 64) < UINT16_MAX)
     {
         T1CONbits.TCKPS = TCKPS_ONE_TO_SIXTYFOUR_PRESCALE;
-        timer1_reload_value = calc_timer1_reload_val(64);
+        PR1 = counts / 64;
     }
     else
     {
         T1CONbits.TCKPS = TCKPS_ONE_TO_TWOHUNDRED_AND_FIFTYSIX_PRESCALE;
-        timer1_reload_value = calc_timer1_reload_val(256);
+        PR1 = counts / 256;
     }
 
     T1CONbits.TCS = TCS_INTERNAL_CLOCK;
@@ -146,7 +143,6 @@ static uint16_t calc_timer1_reload_val(uint32_t prescaler)
 
 void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void)
 {
-    TMR1 = timer1_reload_value;
     IFS0bits.T1IF = 0;
 
     ++current_time;
