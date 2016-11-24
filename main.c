@@ -63,6 +63,9 @@ int main(void)
                 HEATER_OFF;
             }
         }
+        //
+        // Run control loop
+        //
         else if (status_check(STATUS_RUN_PID_FLAG))
         {
             status_clear(STATUS_RUN_PID_FLAG);
