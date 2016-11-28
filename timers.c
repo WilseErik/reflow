@@ -51,11 +51,6 @@ static volatile uint32_t current_time = 0;
 // Private function declarations
 // =============================================================================
 
-/**
- * @brief Calculates which value the timer should be reloaded with at overflow.
- */
-static uint16_t calc_timer1_reload_val(uint32_t prescaler);
-
 // =============================================================================
 // Public function definitions
 // =============================================================================
@@ -133,14 +128,6 @@ uint32_t timers_get_millis(void)
 // Private function definitions
 // =============================================================================
 
-static uint16_t calc_timer1_reload_val(uint32_t prescaler)
-{
-    uint32_t counts = (TIMER_CLOCK_FREQ_HZ / prescaler) / MSEC_TIMER_FREQ_HZ;
-    uint16_t reload = UINT16_MAX - counts;
-    
-    return reload;
-}
-
 void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void)
 {
     IFS0bits.T1IF = 0;
@@ -159,7 +146,7 @@ void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void)
     {
         prescaler_250ms = 0;
 
-        status_set(STATUS_UPDATE_LCD_FLAG, true);
+        status_set(STATUS_LCD_REFRESH_FLAG, true);
         status_set(STATUS_UART_LOG_TEMP_FLAG, true);
     }
 

@@ -14,6 +14,9 @@ extern "C" {
 // Include statements
 // =============================================================================
 
+#include <stdbool.h>
+#include <stdint.h>
+
 // =============================================================================
 // Public type definitions
 // =============================================================================
@@ -37,12 +40,15 @@ typedef enum
 // Global constatants
 // =============================================================================
 
+#define LCD_LINE_LEN 14
+
 // =============================================================================
 // Public function declarations
 // =============================================================================
 
 /**
  * @brief Initializes the LCD display.
+ * @details Should not be called before 40ms after startup.
  */
 void lcd_init(void);
 
@@ -56,6 +62,20 @@ void lcd_refresh(void);
  * @param new_state - state to set.
  */
 void lcd_set_state(lcd_state_t new_state);
+
+/**
+ * @brief Checks if the LCD is busy.
+ * @return true if busy.
+ */
+bool lcd_is_busy(void);
+
+/**
+ * @brief Sets the text that is shown on the display.
+ * @param first_line - text to set for the upper lcd display line.
+ * @param second_line - text to set for the lower lcd display line.
+ */
+void lcd_set_text(char first_line[LCD_LINE_LEN],
+                  char second_line[LCD_LINE_LEN]);
 
 #ifdef	__cplusplus
 }

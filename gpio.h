@@ -93,7 +93,13 @@ extern "C" {
 
 #define LCD_DATA_PORT_REG           LATE
 #define LCD_DATA_DIR_REG            TRISE
-#define LCD_DATA_MASK               0xFF00
+#define LCD_DATA_MASK               0x00FF
+#define LCD_DATA_SHIFT              0
+
+#define LCD_SET_DATA_DIR_OUT        LCD_DATA_DIR_REG &= ~LCD_DATA_MASK
+#define LCD_SET_DATA_DIR_IN         LCD_DATA_DIR_REG |= LCD_DATA_MASK
+#define LCD_SET_DATA(data)          do {LCD_DATA_PORT_REG &= ~LCD_DATA_MASK; \
+                                    LCD_DATA_PORT_REG |= (data) << LCD_DATA_SHIFT;} while (0)
 
 #define LCD_DB0_PIN                 LATEbits.LATE0
 #define LCD_DB0_DIR                 TRISEbits.TRISE0

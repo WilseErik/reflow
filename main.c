@@ -10,6 +10,8 @@
 #include "gpio.h"
 #include "buttons.h"
 #include "max6675.h"
+#include "timers.h"
+#include "lcd.h"
 
 // =============================================================================
 // Private type definitions
@@ -82,10 +84,13 @@ int main(void)
         //
         // Refresh LCD screen
         //
-        else if (status_check(STATUS_UPDATE_LCD_FLAG))
+        else if (status_check(STATUS_LCD_REFRESH_FLAG))
         {
-            status_clear(STATUS_UPDATE_LCD_FLAG);
-            // Start update of display
+            if (!lcd_is_busy())
+            {
+                status_clear(STATUS_LCD_REFRESH_FLAG);
+                lcd_refresh();
+            }
         }
         //
         // Log temp over UART
