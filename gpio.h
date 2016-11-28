@@ -46,15 +46,27 @@ extern "C" {
 
 #define DEBUG_1_LED_PIN             LATBbits.LATB12
 #define DEBUG_1_LED_DIR             TRISBbits.TRISB12
+#define DEBUG_1_LED_ON              LATBbits.LATB12 = 1
+#define DEBUG_1_LED_OFF             LATBbits.LATB12 = 0
+#define DEBUG_1_LED_TOGGLE          LATBbits.LATB12 = !LATBbits.LATB12
 
 #define DEBUG_2_LED_PIN             LATBbits.LATB13
 #define DEBUG_2_LED_DIR             TRISBbits.TRISB13
+#define DEBUG_2_LED_ON              LATBbits.LATB13 = 1
+#define DEBUG_2_LED_OFF             LATBbits.LATB13 = 0
+#define DEBUG_2_LED_TOGGLE          LATBbits.LATB13 = !LATBbits.LATB13
 
 #define DEBUG_3_LED_PIN             LATBbits.LATB14
 #define DEBUG_3_LED_DIR             TRISBbits.TRISB14
+#define DEBUG_3_LED_ON              LATBbits.LATB14 = 1
+#define DEBUG_3_LED_OFF             LATBbits.LATB14 = 0
+#define DEBUG_3_LED_TOGGLE          LATBbits.LATB14 = !LATBbits.LATB14
 
 #define DEBUG_4_LED_PIN             LATBbits.LATB15
 #define DEBUG_4_LED_DIR             TRISBbits.TRISB15
+#define DEBUG_4_LED_ON              LATBbits.LATB15 = 1
+#define DEBUG_4_LED_OFF             LATBbits.LATB15 = 0
+#define DEBUG_4_LED_TOGGLE          LATBbits.LATB15 = !LATBbits.LATB15
 
 //
 // Buttons
