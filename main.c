@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #include "init.h"
 #include "status.h"
@@ -12,6 +13,7 @@
 #include "max6675.h"
 #include "timers.h"
 #include "lcd.h"
+#include "uart.h"
 
 // =============================================================================
 // Private type definitions
@@ -58,7 +60,16 @@ int main(void)
         //
         else if (status_check(STATUS_CRITICAL_ERROR_FLAG))
         {
-            status_clear(STATUS_CRITICAL_ERROR_FLAG);
+            char msg[16] = {0};
+            HEATER_OFF;
+
+            sprintf(msg, "Crit Err %d", status_check(STATUS_CRITICAL_ERROR_FLAG));
+            uart_write_string(msg);
+
+            DEBUG_1_LED_ON;
+            DEBUG_2_LED_ON;
+            DEBUG_3_LED_ON;
+            DEBUG_4_LED_ON;
 
             while (1)
             {
