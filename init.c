@@ -40,8 +40,11 @@ void init(void)
     uart_init();
 
     uart_write_string("Reflow oven controller v1.0\n\r");
-    uart_write_string("Last compiled nov 2016\n\r");
-    uart_write_string("Type 'help' for help.\n\r");
+    uart_write_string("Last compiled ");
+    uart_write_string(__DATE__);
+    uart_write_string(", ");
+    uart_write_string(__TIME__);
+    uart_write_string("\n\rType 'help' for help.\n\r");
 
     buttons_init();
     max6675_init();
