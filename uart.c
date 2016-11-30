@@ -36,6 +36,8 @@
 static const uint32_t UART_BAUD = 9600;
 static const uint32_t PERIPHERAL_FREQ = 16000000;
 
+static const uint8_t COMMAND_TERMINATION_CHAR = '\n';
+
 // =============================================================================
 // Private variables
 // =============================================================================
@@ -293,9 +295,12 @@ void __attribute__((interrupt, no_auto_psv)) _U1RXInterrupt(void)
 
     while (U1STAbits.URXDA)
     {
-        status_set(STATUS_UART_RECEIVE_FLAG, true);
-
         received = U1RXREG;
+
+        if (COMMAND_TERMINATION_CHAR == received)
+        {
+            status_set(STATUS_UART_RECEIVE_FLAG, true);
+        }
 
         if (BACKSPACE_CHAR != received)
         {
