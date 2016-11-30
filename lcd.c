@@ -142,6 +142,8 @@ void lcd_init(void)
         queue_instr_clear_display();
 
         queue_instr_entry_mode_set(true, false);    // do not shift display.
+
+        run_queue();
     }
 }
 
@@ -199,6 +201,8 @@ static void run_queue(void)
 {
     uint16_t i = task_list.first;
 
+    queue_is_executing = task_list.tasks[i].valid;
+
     if (task_list.tasks[i].valid)
     {
         if (task_list.tasks[i].rs)
@@ -242,9 +246,11 @@ static void run_queue(void)
             start_wait(task_list.tasks[i].wait_us);
         }
     }
-    else
+    else if (!initialized)
     {
-        queue_is_executing = false;
+        // End of queue reached, if not initialized this queue must have been
+        // the initialization sequence.
+        initialized = true;
     }
 }
 
