@@ -16,6 +16,13 @@
 // Private type definitions
 // =============================================================================
 
+/*
+ * Each message sent to the LCD is called an instruction.
+ * Each instruction has a specific set of control signals, which are
+ * the RS pin, the RW pin and the DB pins DB0-DB7.
+ * After each instruction the LCD will be unable to receive new commands
+ * for a specific wait time.
+ */
 typedef struct lcd_instr_t
 {
     bool rs;
@@ -25,14 +32,21 @@ typedef struct lcd_instr_t
     bool valid;
 } lcd_instr_t;
 
-#define TASK_LIST_SIZE 100
+#define TASK_QUEUE_SIZE 100
 
-typedef struct lcd_task_list_t
+/*
+ * To send commands to the LCD, list all the commands in a queue and
+ * run these asyncronously. This queue is a FIFO implemented as a circular
+ * buffer, where instructions are inserted at the last index.
+ * When the queue is run it starts with the first index and continues to run
+ * instructions for wich the valid memeber is true.
+ */
+typedef struct task_queue_t
 {
-    lcd_instr_t tasks[TASK_LIST_SIZE];
+    lcd_instr_t tasks[TASK_QUEUE_SIZE];
     uint16_t first;
     uint16_t last;
-} task_list_t;
+} task_queue_t;
 
 // =============================================================================
 // Global variables
@@ -59,7 +73,7 @@ static const uint16_t DDRAM_SECOND_LINE_START = 0x40;
 static volatile bool initialized = false;
 static volatile bool queue_is_executing = false;
 
-static volatile task_list_t task_list;
+static volatile task_queue_t task_queue;
 
 // =============================================================================
 // Private function declarations
@@ -69,7 +83,7 @@ static volatile task_list_t task_list;
  * @brief Starts to run the instruction queue.
  * @details The queue is run asyncronously.
  */
-static void run_queue(void);
+static void run_next_in_queue(void);
 
 //
 // Add instruction functions
@@ -128,7 +142,7 @@ void lcd_init(void)
 {
     if (!initialized)
     {
-        memset((task_list_t*)&task_list, 0, sizeof (task_list_t));
+        memset((task_queue_t*)&task_queue, 0, sizeof (task_queue_t));
         lcd_timer_init();
 
         queue_instr_function_set(true,  // 8 bit mode
@@ -143,7 +157,7 @@ void lcd_init(void)
 
         queue_instr_entry_mode_set(true, false);    // do not shift display.
 
-        run_queue();
+        run_next_in_queue();
     }
 }
 
@@ -197,15 +211,15 @@ void lcd_set_text(char first_line[LCD_LINE_LEN],
 // Private function definitions
 // =============================================================================
 
-static void run_queue(void)
+static void run_next_in_queue(void)
 {
-    uint16_t i = task_list.first;
+    uint16_t i = task_queue.first;
 
-    queue_is_executing = task_list.tasks[i].valid;
+    queue_is_executing = task_queue.tasks[i].valid;
 
-    if (task_list.tasks[i].valid)
+    if (task_queue.tasks[i].valid)
     {
-        if (task_list.tasks[i].rs)
+        if (task_queue.tasks[i].rs)
         {
             LCD_RS_PIN = 1;
         }
@@ -215,7 +229,7 @@ static void run_queue(void)
         }
 
 
-        if (task_list.tasks[i].rw)
+        if (task_queue.tasks[i].rw)
         {
             LCD_RW_PIN = 1;
 
@@ -227,7 +241,7 @@ static void run_queue(void)
 
             LCD_E_PIN = 0;
 
-            start_wait(task_list.tasks[i].wait_us);
+            start_wait(task_queue.tasks[i].wait_us);
         }
         else
         {
@@ -235,7 +249,7 @@ static void run_queue(void)
             LCD_RW_PIN = 0;
 
             LCD_SET_DATA_DIR_OUT;
-            LCD_SET_DATA(task_list.tasks[i].db);
+            LCD_SET_DATA(task_queue.tasks[i].db);
             LCD_E_PIN = 1;
 
             // Wait at least 460ns
@@ -243,7 +257,7 @@ static void run_queue(void)
 
             LCD_E_PIN = 0;
 
-            start_wait(task_list.tasks[i].wait_us);
+            start_wait(task_queue.tasks[i].wait_us);
         }
     }
     else if (!initialized)
@@ -256,196 +270,196 @@ static void run_queue(void)
 
 static void queue_instr_clear_display(void)
 {
-    uint16_t next = task_list.last + 1;
+    uint16_t next = task_queue.last + 1;
 
-    if (TASK_LIST_SIZE == next)
+    if (TASK_QUEUE_SIZE == next)
     {
         next = 0;
     }
 
-    task_list.tasks[next].rs = false;
-    task_list.tasks[next].rw = false;
-    task_list.tasks[next].db = 0x01;
-    task_list.tasks[next].wait_us = 2000;
-    task_list.tasks[next].valid = true;
+    task_queue.tasks[next].rs = false;
+    task_queue.tasks[next].rw = false;
+    task_queue.tasks[next].db = 0x01;
+    task_queue.tasks[next].wait_us = 2000;
+    task_queue.tasks[next].valid = true;
 
-    task_list.last = next;
+    task_queue.last = next;
 }
 
 static void queue_instr_return_home(void)
 {
-    uint16_t next = task_list.last + 1;
+    uint16_t next = task_queue.last + 1;
 
-    if (TASK_LIST_SIZE == next)
+    if (TASK_QUEUE_SIZE == next)
     {
         next = 0;
     }
 
-    task_list.tasks[next].rs = false;
-    task_list.tasks[next].rw = false;
-    task_list.tasks[next].db = 0x02;
-    task_list.tasks[next].wait_us = 2000;
-    task_list.tasks[next].valid = true;
+    task_queue.tasks[next].rs = false;
+    task_queue.tasks[next].rw = false;
+    task_queue.tasks[next].db = 0x02;
+    task_queue.tasks[next].wait_us = 2000;
+    task_queue.tasks[next].valid = true;
 
-    task_list.last = next;
+    task_queue.last = next;
 }
 
 static void queue_instr_entry_mode_set(bool i_d, bool s)
 {
-    uint16_t next = task_list.last + 1;
+    uint16_t next = task_queue.last + 1;
 
-    if (TASK_LIST_SIZE == next)
+    if (TASK_QUEUE_SIZE == next)
     {
         next = 0;
     }
 
-    task_list.tasks[next].rs = false;
-    task_list.tasks[next].rw = false;
-    task_list.tasks[next].db = 0x04;
+    task_queue.tasks[next].rs = false;
+    task_queue.tasks[next].rw = false;
+    task_queue.tasks[next].db = 0x04;
 
     if (i_d)
-        task_list.tasks[next].db |= 0x02;
+        task_queue.tasks[next].db |= 0x02;
     if (s)
-        task_list.tasks[next].db |= 0x01;
+        task_queue.tasks[next].db |= 0x01;
 
-    task_list.tasks[next].wait_us = 50;
-    task_list.tasks[next].valid = true;
+    task_queue.tasks[next].wait_us = 50;
+    task_queue.tasks[next].valid = true;
 
-    task_list.last = next;
+    task_queue.last = next;
 }
 
 static void queue_instr_display_on_off(bool disp_on,
                                         bool cursor_on,
                                         bool cursor_pos_on)
 {
-    uint16_t next = task_list.last + 1;
+    uint16_t next = task_queue.last + 1;
 
-    if (TASK_LIST_SIZE == next)
+    if (TASK_QUEUE_SIZE == next)
     {
         next = 0;
     }
 
-    task_list.tasks[next].rs = false;
-    task_list.tasks[next].rw = false;
-    task_list.tasks[next].db = 0x08;
+    task_queue.tasks[next].rs = false;
+    task_queue.tasks[next].rw = false;
+    task_queue.tasks[next].db = 0x08;
 
     if (disp_on)
-        task_list.tasks[next].db |= 0x04;
+        task_queue.tasks[next].db |= 0x04;
     if (cursor_on)
-        task_list.tasks[next].db |= 0x02;
+        task_queue.tasks[next].db |= 0x02;
     if (cursor_pos_on)
-        task_list.tasks[next].db |= 0x01;
+        task_queue.tasks[next].db |= 0x01;
 
-    task_list.tasks[next].wait_us = 50;
-    task_list.tasks[next].valid = true;
+    task_queue.tasks[next].wait_us = 50;
+    task_queue.tasks[next].valid = true;
 
-    task_list.last = next;
+    task_queue.last = next;
 }
 
 static void queue_instr_disp_shift(bool s_c, bool r_l)
 {
-    uint16_t next = task_list.last + 1;
+    uint16_t next = task_queue.last + 1;
 
-    if (TASK_LIST_SIZE == next)
+    if (TASK_QUEUE_SIZE == next)
     {
         next = 0;
     }
 
-    task_list.tasks[next].rs = false;
-    task_list.tasks[next].rw = false;
-    task_list.tasks[next].db = 0x10;
+    task_queue.tasks[next].rs = false;
+    task_queue.tasks[next].rw = false;
+    task_queue.tasks[next].db = 0x10;
 
     if (s_c)
-        task_list.tasks[next].db |= 0x08;
+        task_queue.tasks[next].db |= 0x08;
     if (r_l)
-        task_list.tasks[next].db |= 0x04;
+        task_queue.tasks[next].db |= 0x04;
 
-    task_list.tasks[next].wait_us = 50;
-    task_list.tasks[next].valid = true;
+    task_queue.tasks[next].wait_us = 50;
+    task_queue.tasks[next].valid = true;
 
-    task_list.last = next;
+    task_queue.last = next;
 }
 
 static void queue_instr_function_set(bool use_8_bit_interface,
                                       bool use_2_lines,
                                       bool font_size_5_11)
 {
-    uint16_t next = task_list.last + 1;
+    uint16_t next = task_queue.last + 1;
 
-    if (TASK_LIST_SIZE == next)
+    if (TASK_QUEUE_SIZE == next)
     {
         next = 0;
     }
 
-    task_list.tasks[next].rs = false;
-    task_list.tasks[next].rw = false;
-    task_list.tasks[next].db = 0x20;
+    task_queue.tasks[next].rs = false;
+    task_queue.tasks[next].rw = false;
+    task_queue.tasks[next].db = 0x20;
 
     if (use_8_bit_interface)
-        task_list.tasks[next].db |= 0x10;
+        task_queue.tasks[next].db |= 0x10;
     if (use_2_lines)
-        task_list.tasks[next].db |= 0x08;
+        task_queue.tasks[next].db |= 0x08;
     if (font_size_5_11)
-        task_list.tasks[next].db |= 0x04;
+        task_queue.tasks[next].db |= 0x04;
 
-    task_list.tasks[next].wait_us = 50;
-    task_list.tasks[next].valid = true;
+    task_queue.tasks[next].wait_us = 50;
+    task_queue.tasks[next].valid = true;
 
-    task_list.last = next;
+    task_queue.last = next;
 }
 
 static void queue_instr_set_cgram_addr(uint8_t addr)
 {
-    uint16_t next = task_list.last + 1;
+    uint16_t next = task_queue.last + 1;
 
-    if (TASK_LIST_SIZE == next)
+    if (TASK_QUEUE_SIZE == next)
     {
         next = 0;
     }
 
-    task_list.tasks[next].rs = false;
-    task_list.tasks[next].rw = false;
-    task_list.tasks[next].db = 0x40 | (addr & 0x3F);
-    task_list.tasks[next].wait_us = 50;
-    task_list.tasks[next].valid = true;
+    task_queue.tasks[next].rs = false;
+    task_queue.tasks[next].rw = false;
+    task_queue.tasks[next].db = 0x40 | (addr & 0x3F);
+    task_queue.tasks[next].wait_us = 50;
+    task_queue.tasks[next].valid = true;
 
-    task_list.last = next;
+    task_queue.last = next;
 }
 
 static void queue_instr_set_ddram_addr(uint8_t addr)
 {
-    uint16_t next = task_list.last + 1;
+    uint16_t next = task_queue.last + 1;
 
-    if (TASK_LIST_SIZE == next)
+    if (TASK_QUEUE_SIZE == next)
     {
         next = 0;
     }
 
-    task_list.tasks[next].rs = false;
-    task_list.tasks[next].rw = false;
-    task_list.tasks[next].db = 0x80 | (addr & 0x7F);
-    task_list.tasks[next].wait_us = 50;
-    task_list.tasks[next].valid = true;
+    task_queue.tasks[next].rs = false;
+    task_queue.tasks[next].rw = false;
+    task_queue.tasks[next].db = 0x80 | (addr & 0x7F);
+    task_queue.tasks[next].wait_us = 50;
+    task_queue.tasks[next].valid = true;
 
-    task_list.last = next;
+    task_queue.last = next;
 }
 
 static void queue_instr_read_busy_flag(void)
 {
-    uint16_t next = task_list.last + 1;
+    uint16_t next = task_queue.last + 1;
 
-    if (TASK_LIST_SIZE == next)
+    if (TASK_QUEUE_SIZE == next)
     {
         next = 0;
     }
 
-    task_list.tasks[next].rs = false;
-    task_list.tasks[next].rw = true;
-    task_list.tasks[next].db = 0;
-    task_list.tasks[next].wait_us = 0;
-    task_list.tasks[next].valid = true;
+    task_queue.tasks[next].rs = false;
+    task_queue.tasks[next].rw = true;
+    task_queue.tasks[next].db = 0;
+    task_queue.tasks[next].wait_us = 0;
+    task_queue.tasks[next].valid = true;
 
-    task_list.last = next;
+    task_queue.last = next;
 
     lcd_instr_t i;
     i.rs = false;
@@ -455,38 +469,38 @@ static void queue_instr_read_busy_flag(void)
 
 static void queue_instr_write_data_to_ram(uint8_t data)
 {
-    uint16_t next = task_list.last + 1;
+    uint16_t next = task_queue.last + 1;
 
-    if (TASK_LIST_SIZE == next)
+    if (TASK_QUEUE_SIZE == next)
     {
         next = 0;
     }
 
-    task_list.tasks[next].rs = true;
-    task_list.tasks[next].rw = false;
-    task_list.tasks[next].db = 0xC0 | (data & 0x3F);
-    task_list.tasks[next].wait_us = 50;
-    task_list.tasks[next].valid = true;
+    task_queue.tasks[next].rs = true;
+    task_queue.tasks[next].rw = false;
+    task_queue.tasks[next].db = 0xC0 | (data & 0x3F);
+    task_queue.tasks[next].wait_us = 50;
+    task_queue.tasks[next].valid = true;
 
-    task_list.last = next;
+    task_queue.last = next;
 }
 
 static void queue_instr_read_data_from_ram(void)
 {
-    uint16_t next = task_list.last + 1;
+    uint16_t next = task_queue.last + 1;
 
-    if (TASK_LIST_SIZE == next)
+    if (TASK_QUEUE_SIZE == next)
     {
         next = 0;
     }
 
-    task_list.tasks[next].rs = true;
-    task_list.tasks[next].rw = true;
-    task_list.tasks[next].db = 0x00;
-    task_list.tasks[next].wait_us = 50;
-    task_list.tasks[next].valid = true;
+    task_queue.tasks[next].rs = true;
+    task_queue.tasks[next].rw = true;
+    task_queue.tasks[next].db = 0x00;
+    task_queue.tasks[next].wait_us = 50;
+    task_queue.tasks[next].valid = true;
 
-    task_list.last = next;
+    task_queue.last = next;
 }
 
 
@@ -549,17 +563,17 @@ static void start_wait(uint16_t microseconds_to_wait)
 
 static void wait_time_complete(void)
 {
-    uint16_t next_first = task_list.first + 1;
+    uint16_t next_first = task_queue.first + 1;
 
-    if (TASK_LIST_SIZE == next_first)
+    if (TASK_QUEUE_SIZE == next_first)
     {
         next_first = 0;
     }
 
-    task_list.tasks[task_list.first].valid = false;
-    task_list.first = next_first;
+    task_queue.tasks[task_queue.first].valid = false;
+    task_queue.first = next_first;
 
-    run_queue();
+    run_next_in_queue();
 
 }
 
