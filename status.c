@@ -15,7 +15,7 @@
 // Global variables
 // =============================================================================
 
-status_item_t status_bytes[STATUS_BYTE_LAST] = {0};
+volatile status_item_t status_bytes[STATUS_BYTE_LAST] = {0};
 
 // =============================================================================
 // Private constants

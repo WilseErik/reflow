@@ -47,7 +47,7 @@ typedef bool status_item_t;
 // Global variable declarations
 // =============================================================================
 
-extern status_item_t status_bytes[STATUS_BYTE_LAST];
+extern volatile status_item_t status_bytes[STATUS_BYTE_LAST];
 
 // =============================================================================
 // Global constatants
