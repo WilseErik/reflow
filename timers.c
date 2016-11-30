@@ -9,6 +9,7 @@
 #include <stdbool.h>
 
 #include "status.h"
+#include "buttons.h"
 
 // =============================================================================
 // Private type definitions
@@ -133,6 +134,8 @@ void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void)
     IFS0bits.T1IF = 0;
 
     ++current_time;
+
+    buttons_run_debounce_logic();
     
     if (10 == ++prescaler_10ms)
     {
