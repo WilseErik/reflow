@@ -35,7 +35,7 @@ volatile status_item_t status_bytes[STATUS_BYTE_LAST] = {0};
 
 void status_init(void)
 {
-    memset(status_bytes, 0, sizeof(status_bytes));
+    memset((void*)status_bytes, 0, sizeof(status_bytes));
 }
 
 // =============================================================================
