@@ -1,3 +1,10 @@
+/*
+ * References:
+ * - ST7066U Dot Matrix LCD Controller/Driver V2.2 datasheet
+ * - Document nbr DS39747D - PIC24FJ128GA010 Family Data Sheet
+ */
+
+
 // =============================================================================
 // Include statements
 // =============================================================================
@@ -86,8 +93,11 @@ static volatile task_queue_t task_queue;
 static void run_next_in_queue(void);
 
 //
-// Add instruction functions
+// Add instruction functions:
 //
+// See ST7066U datasheet pages 17-21 for more info.
+//
+
 static void queue_instr_clear_display(void);
 
 static void queue_instr_return_home(void);
@@ -138,6 +148,9 @@ static void wait_time_complete(void);
 // Public function definitions
 // =============================================================================
 
+/*
+ * Reference: Initialization described in ST7066U datasheet page 23
+ */
 void lcd_init(void)
 {
     if (!initialized)
@@ -268,6 +281,9 @@ static void run_next_in_queue(void)
     }
 }
 
+/*
+ * Reference: Instruction described in ST7066U datasheet page 17
+ */
 static void queue_instr_clear_display(void)
 {
     uint16_t next = task_queue.last + 1;
@@ -286,6 +302,9 @@ static void queue_instr_clear_display(void)
     task_queue.last = next;
 }
 
+/*
+ * Reference: Instruction described in ST7066U datasheet page 17
+ */
 static void queue_instr_return_home(void)
 {
     uint16_t next = task_queue.last + 1;
@@ -304,6 +323,9 @@ static void queue_instr_return_home(void)
     task_queue.last = next;
 }
 
+/*
+ * Reference: Instruction described in ST7066U datasheet page 17
+ */
 static void queue_instr_entry_mode_set(bool i_d, bool s)
 {
     uint16_t next = task_queue.last + 1;
@@ -328,6 +350,9 @@ static void queue_instr_entry_mode_set(bool i_d, bool s)
     task_queue.last = next;
 }
 
+/*
+ * Reference: Instruction described in ST7066U datasheet page 17
+ */
 static void queue_instr_display_on_off(bool disp_on,
                                         bool cursor_on,
                                         bool cursor_pos_on)
@@ -356,6 +381,9 @@ static void queue_instr_display_on_off(bool disp_on,
     task_queue.last = next;
 }
 
+/*
+ * Reference: Instruction described in ST7066U datasheet page 17
+ */
 static void queue_instr_disp_shift(bool s_c, bool r_l)
 {
     uint16_t next = task_queue.last + 1;
@@ -380,6 +408,9 @@ static void queue_instr_disp_shift(bool s_c, bool r_l)
     task_queue.last = next;
 }
 
+/*
+ * Reference: Instruction described in ST7066U datasheet page 17
+ */
 static void queue_instr_function_set(bool use_8_bit_interface,
                                       bool use_2_lines,
                                       bool font_size_5_11)
@@ -408,6 +439,9 @@ static void queue_instr_function_set(bool use_8_bit_interface,
     task_queue.last = next;
 }
 
+/*
+ * Reference: Instruction described in ST7066U datasheet page 17
+ */
 static void queue_instr_set_cgram_addr(uint8_t addr)
 {
     uint16_t next = task_queue.last + 1;
@@ -426,6 +460,9 @@ static void queue_instr_set_cgram_addr(uint8_t addr)
     task_queue.last = next;
 }
 
+/*
+ * Reference: Instruction described in ST7066U datasheet page 17
+ */
 static void queue_instr_set_ddram_addr(uint8_t addr)
 {
     uint16_t next = task_queue.last + 1;
@@ -444,6 +481,9 @@ static void queue_instr_set_ddram_addr(uint8_t addr)
     task_queue.last = next;
 }
 
+/*
+ * Reference: Instruction described in ST7066U datasheet page 17
+ */
 static void queue_instr_read_busy_flag(void)
 {
     uint16_t next = task_queue.last + 1;
@@ -467,6 +507,9 @@ static void queue_instr_read_busy_flag(void)
     i.db = 0x00;
 }
 
+/*
+ * Reference: Instruction described in ST7066U datasheet page 17
+ */
 static void queue_instr_write_data_to_ram(uint8_t data)
 {
     uint16_t next = task_queue.last + 1;
@@ -485,6 +528,9 @@ static void queue_instr_write_data_to_ram(uint8_t data)
     task_queue.last = next;
 }
 
+/*
+ * Reference: Instruction described in ST7066U datasheet page 17
+ */
 static void queue_instr_read_data_from_ram(void)
 {
     uint16_t next = task_queue.last + 1;
