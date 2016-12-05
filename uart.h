@@ -92,7 +92,7 @@ void uart_clear_receive_buffer(void);
  */
 static inline void uart_enable_rx_interrupt()
 {
-    IEC0bits.U1RXIE = 1;
+    IEC1bits.U2RXIE = 1;
 }
 
 /**
@@ -101,7 +101,7 @@ static inline void uart_enable_rx_interrupt()
  */
 static inline void uart_disable_rx_interrupt()
 {
-    IEC0bits.U1RXIE = 0;
+    IEC1bits.U2RXIE = 0;
 }
 
 /**
@@ -110,7 +110,7 @@ static inline void uart_disable_rx_interrupt()
  */
 static inline void uart_enable_tx_interrupt()
 {
-    IEC0bits.U1TXIE = 1;
+    IEC1bits.U2TXIE = 1;
 }
 
 /**
@@ -119,7 +119,7 @@ static inline void uart_enable_tx_interrupt()
  */
 static inline void uart_disable_tx_interrupt()
 {
-    IEC0bits.U1TXIE = 0;
+    IEC1bits.U2TXIE = 0;
 }
 
 

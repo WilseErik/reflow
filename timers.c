@@ -10,6 +10,8 @@
 
 #include "status.h"
 #include "buttons.h"
+#include "uart.h"
+#include "gpio.h"
 
 // =============================================================================
 // Private type definitions

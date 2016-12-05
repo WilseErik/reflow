@@ -140,7 +140,7 @@ extern "C" {
 //
 // MAX6675
 //
-#define MAX6675_MISO_PIN            LATFbits.LATF
+#define MAX6675_MISO_PIN            LATFbits.LATF2
 #define MAX6675_MISO_DIR            TRISFbits.TRISF2
 
 #define MAX6675_SCK_PIN             LATFbits.LATF6

@@ -1,6 +1,8 @@
 // =============================================================================
 // Include statements
 // =============================================================================
+#include <xc.h>
+
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -14,6 +16,7 @@
 #include "timers.h"
 #include "lcd.h"
 #include "uart.h"
+#include "terminal.h"
 
 // =============================================================================
 // Private type definitions
@@ -47,6 +50,8 @@ int main(void)
 
     while (1)
     {
+        ClrWdt();
+
         //
         // Stop button
         //
@@ -76,6 +81,7 @@ int main(void)
                 HEATER_OFF;
             }
         }
+#if 0
         //
         // Run control loop
         //
@@ -111,12 +117,14 @@ int main(void)
             status_clear(STATUS_UART_LOG_TEMP_FLAG);
             // Write current temp over UART
         }
+#endif
         //
         // Handle UART receive buffer
         //
         else if (status_check(STATUS_UART_RECEIVE_FLAG))
         {
             status_clear(STATUS_UART_RECEIVE_FLAG);
+            terminal_handle_uart_event();
             DEBUG_1_LED_PIN = !DEBUG_1_LED_PIN;
         }
         //
@@ -127,6 +135,7 @@ int main(void)
             status_clear(STATUS_START_BUTTON_PUSHED_FLAG);
             buttons_start_pushed();
         }
+#if 0
         //
         // Detect stalls
         //
@@ -136,6 +145,7 @@ int main(void)
         {
             status_set(STATUS_CRITICAL_ERROR_FLAG, CRIT_ERR_READ_TIMEOUT);
         }
+#endif
     }
 
     return EXIT_SUCCESS;

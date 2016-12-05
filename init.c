@@ -1,8 +1,9 @@
 // =============================================================================
 // Include statements
 // =============================================================================
-
 #include "init.h"
+
+#include <xc.h>
 
 #include "gpio.h"
 #include "uart.h"
@@ -36,9 +37,13 @@
 
 void init(void)
 {
+    CLKDIVbits.RCDIV = 0;
+
     gpio_init();
+
     uart_init();
 
+    uart_write_string("\n\r\n\r");
     uart_write_string("Reflow oven controller v1.0\n\r");
     uart_write_string("Last compiled ");
     uart_write_string(__DATE__);

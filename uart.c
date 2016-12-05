@@ -97,30 +97,30 @@ void uart_init()
         //
         // UART module
         //
-        U1MODE = 0x0000;
-        U1STA = 0x0000;
+        U2MODE = 0x0000;
+        U2STA = 0x0000;
 
-        U1BRG = (PERIPHERAL_FREQ / UART_BAUD) / 16 - 1;
+        U2BRG = (PERIPHERAL_FREQ / UART_BAUD) / 16 - 1;
 
-        U1MODEbits.PDSEL = 0; // 8 bit data, no parity
-        U1MODEbits.STSEL = 0; // 1 Stop bit
+        U2MODEbits.PDSEL = 0; // 8 bit data, no parity
+        U2MODEbits.STSEL = 0; // 1 Stop bit
 
         // Interrupt is generated when any character is transfered to the
         // Transmit Shift Register and the hw transmit buffer is empty.
-        U1STAbits.UTXISEL0 = 0;
-        U1STAbits.UTXISEL1 = 0;
-        IPC3bits.U1TXIP = 2;  // Interrupt priority
-        IEC0bits.U1TXIE = 1;  // TX interrupt enable
+        U2STAbits.UTXISEL0 = 0;
+        U2STAbits.UTXISEL1 = 0;
+        IPC7bits.U2TXIP = 2;  // Interrupt priority
+        IEC1bits.U2TXIE = 1;  // TX interrupt enable
 
         // Interrupt is generated each time a data word is transfered from
         // the U1RSR to the receive buffer. There may be one or more characters
         // in the receive buffer.
-        U1STAbits.URXISEL = 0;
-        IPC2bits.U1RXIP = 2;  // Interrupt priority
-        IEC0bits.U1RXIE = 1;  // RX interrupt enable
+        U2STAbits.URXISEL = 0;
+        IPC7bits.U2RXIP = 2;  // Interrupt priority
+        IEC1bits.U2RXIE = 1;  // RX interrupt enable
 
-        U1STAbits.UTXEN = 1;
-        U1MODEbits.UARTEN = 1;
+        U2MODEbits.UARTEN = 1;
+        U2STAbits.UTXEN = 1;
 
         for (wait_cnt = 0; wait_cnt != PERIPHERAL_FREQ / UART_BAUD; ++wait_cnt)
         {
@@ -133,10 +133,10 @@ void uart_init()
 
 void uart_write(uint8_t data)
 {
-    if ((0 == tx_buff_size) && (0 == U1STAbits.UTXBF))
+    if ((0 == tx_buff_size) && (0 == U2STAbits.UTXBF))
     {
         // hw transmit buffer not full but tx buffer is.
-        U1TXREG = data;
+        U2TXREG = data;
     }
     else if (tx_buff_size < BUFFER_SIZE)
     {
@@ -217,7 +217,7 @@ uint8_t uart_get(uint16_t index)
     uint16_t i;
     uint8_t data;
 
-    IEC0bits.U1RXIE = 0;
+    uart_disable_rx_interrupt();
 
     i = rx_buff_first + index;
 
@@ -228,7 +228,7 @@ uint8_t uart_get(uint16_t index)
 
     data = rx_buff[i];
 
-    IEC0bits.U1RXIE = 1;
+    uart_enable_rx_interrupt();
 
     return data;
 }
@@ -245,13 +245,13 @@ bool uart_is_receive_buffer_empty(void)
 
 void uart_clear_receive_buffer(void)
 {
-    IEC0bits.U1RXIE = 0;
+    uart_disable_rx_interrupt();
 
     rx_buff_size = 0;
     rx_buff_first = 0;
     rx_buff_last = 0;
 
-    IEC0bits.U1RXIE = 1;
+    uart_enable_rx_interrupt();
 }
 
 
@@ -259,12 +259,12 @@ void uart_clear_receive_buffer(void)
 // Private function definitions
 // =============================================================================
 
-void __attribute__((interrupt, no_auto_psv)) _U1TXInterrupt(void)
+void __attribute__((interrupt, no_auto_psv)) _U2TXInterrupt(void)
 {
-    while ((0 == U1STAbits.UTXBF) && (0 != tx_buff_size))
+    while ((0 == U2STAbits.UTXBF) && (0 != tx_buff_size))
     {
         // TX fifo not full and there are more things to send
-        U1TXREG = tx_buff[tx_buff_first];
+        U2TXREG = tx_buff[tx_buff_first];
 
         if (1 != tx_buff_size)
         {
@@ -279,23 +279,23 @@ void __attribute__((interrupt, no_auto_psv)) _U1TXInterrupt(void)
         --tx_buff_size;
     }
 
-    IFS0bits.U1TXIF = 0;
+    IFS1bits.U2TXIF = 0;
 }
 
-void __attribute__((interrupt, no_auto_psv)) _U1RXInterrupt(void)
+void __attribute__((interrupt, no_auto_psv)) _U2RXInterrupt(void)
 {
     uint8_t received;
 
-    IEC0bits.U1TXIE = 0;
+    uart_disable_tx_interrupt();
 
-    if (U1STAbits.OERR)
+    if (U2STAbits.OERR)
     {
-        U1STAbits.OERR = 0;
+        U2STAbits.OERR = 0;
     }
 
-    while (U1STAbits.URXDA)
+    while (U2STAbits.URXDA)
     {
-        received = U1RXREG;
+        received = U2RXREG;
 
         if (COMMAND_TERMINATION_CHAR == received)
         {
@@ -343,19 +343,19 @@ void __attribute__((interrupt, no_auto_psv)) _U1RXInterrupt(void)
         uart_write(received);
     }
 
-    IEC0bits.U1TXIE = 1;
+    uart_enable_tx_interrupt();
 
-    IFS0bits.U1RXIF = 0;
+    IFS1bits.U2RXIF = 0;
 }
 
 static void start_tx(void)
 {
-    IEC0bits.U1TXIE = 0;
-    IEC0bits.U1RXIE = 0;
+    uart_disable_tx_interrupt();
+    uart_disable_rx_interrupt();
 
-    while ((0 != tx_buff_size) && (0 == U1STAbits.UTXBF))
+    while ((0 != tx_buff_size) && (0 == U2STAbits.UTXBF))
     {
-        U1TXREG = tx_buff[tx_buff_first];
+        U2TXREG = tx_buff[tx_buff_first];
 
         if (1 != tx_buff_size)
         {
@@ -370,7 +370,7 @@ static void start_tx(void)
         --tx_buff_size;
     }
 
-    IEC0bits.U1TXIE = 1;
-    IEC0bits.U1RXIE = 1;
+    uart_enable_tx_interrupt();
+    uart_enable_rx_interrupt();
 }
 

@@ -121,11 +121,16 @@ static void execute_command(void)
         {
             cmd_hello();
         }
+        else
+        {
+            syntax_error = true;
+        }
     }
 
     if (syntax_error)
     {
         uart_write_string(SYNTAX_ERROR);
+        uart_write_string(NEWLINE);
     }
     else
     {

@@ -52,7 +52,6 @@ void gpio_init(void)
     LEAD_SWITCH_DIR     = DIR_IN;
 
     UART_TX_DIR         = DIR_OUT;
-    UART_TX_PIN         = 1;
     UART_RX_DIR         = DIR_IN;
 
     LCD_RS_DIR          = DIR_OUT;
