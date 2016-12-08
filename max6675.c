@@ -177,6 +177,29 @@ bool max6675_first_reading_done(void)
     return first_reading_complete;
 }
 
+uint16_t max6675_read_blocking(void)
+{
+    uint16_t ret_val = 0x0000;
+
+    IEC0bits.SPI1IE = 0;
+
+    MAX6675_1_CS_ON;
+    SPI1BUF = 0x0000;   // load with dummy value to start reading
+
+    while (!SPI1STATbits.SPIRBF)
+    {
+        DEBUG_2_LED_ON;
+    }
+    DEBUG_2_LED_OFF;
+
+    ret_val = SPI1BUF;
+    MAX6675_1_CS_OFF;
+    
+    IEC0bits.SPI1IE = 1;
+
+    return ret_val;
+}
+
 // =============================================================================
 // Private function definitions
 // =============================================================================
@@ -229,6 +252,7 @@ static void add_reading(uint16_t temp)
 void __attribute__((interrupt, no_auto_psv)) _SPI1Interrupt(void)
 {
     bool parse_read_values = false;
+    DEBUG_1_LED_TOGGLE;
 
     switch (read_state)
     {

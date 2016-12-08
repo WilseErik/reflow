@@ -6,9 +6,11 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "uart.h"
 #include "terminal_help.h"
+#include "max6675.h"
 
 // =============================================================================
 // Private type definitions
@@ -39,7 +41,13 @@ static const char SYNTAX_ERROR[]    = "[Syntax error]";
 /*§
  Say hi!
  */
-static const char CMD_HELLO[]    = "hello";
+static const char CMD_HELLO[]       = "hello";
+
+/*§
+ Reads one value from the first MAX6675 ic.
+ Returns: <read value as 16 bits in hex format>
+ */
+static const char CMD_TEST_TEMP[]   = "test temp";
 
 // =============================================================================
 // Private variables
@@ -65,6 +73,7 @@ static void execute_command(void);
 // Command help functions
 //
 static void cmd_hello(void);
+static void cmd_test_temp(void);
 
 // =============================================================================
 // Public function definitions
@@ -121,6 +130,10 @@ static void execute_command(void)
         {
             cmd_hello();
         }
+        else if (NULL != strstr(cmd_buffer, CMD_TEST_TEMP))
+        {
+            cmd_test_temp();
+        }
         else
         {
             syntax_error = true;
@@ -142,4 +155,12 @@ static void cmd_hello(void)
 {
     uart_write_string("Hello!");
     uart_write_string(NEWLINE);
+}
+
+static void cmd_test_temp(void)
+{
+    char ans[32] = {0};
+    uint16_t reading = max6675_read_blocking();
+    sprintf(ans, "%04X%s", reading, NEWLINE);
+    uart_write_string(ans);
 }

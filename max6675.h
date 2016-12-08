@@ -58,6 +58,12 @@ uint32_t max6675_get_last_reading_time(void);
  */
 bool max6675_first_reading_done(void);
 
+/**
+ * @brief Performs a blocking read of one of the MAX6675 ICs.
+ * @return Raw read 16bit value.
+ */
+uint16_t max6675_read_blocking(void);
+
 #ifdef	__cplusplus
 }
 #endif
