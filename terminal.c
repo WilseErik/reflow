@@ -11,6 +11,7 @@
 #include "uart.h"
 #include "terminal_help.h"
 #include "max6675.h"
+#include "gpio.h"
 
 // =============================================================================
 // Private type definitions
@@ -31,6 +32,7 @@ static const char CMD_TYPE_SET[]    = "set ";
 static const char CMD_TYPE_GET[]    = "get ";
 
 static const char SYNTAX_ERROR[]    = "[Syntax error]";
+static const char ARGUMENT_ERROR[]  = "[Invalid argument]";
 
 #define CMD_BUFFER_SIZE 1025
 
@@ -49,11 +51,18 @@ static const char CMD_HELLO[]       = "hello";
  */
 static const char CMD_TEST_TEMP[]   = "test temp";
 
+/*§
+ Sets the heater on or off.
+ Parameter: <'on' or 'off'>
+ */
+static const char SET_HEATER[]      = "set heater";
+
 // =============================================================================
 // Private variables
 // =============================================================================
 
 static char cmd_buffer[CMD_BUFFER_SIZE] = {0};
+static bool arg_error = false;
 
 // =============================================================================
 // Private function declarations
@@ -74,6 +83,8 @@ static void execute_command(void);
 //
 static void cmd_hello(void);
 static void cmd_test_temp(void);
+
+static void set_heater(void);
 
 // =============================================================================
 // Public function definitions
@@ -111,6 +122,7 @@ static void copy_to_cmd_buffer(void)
 static void execute_command(void)
 {
     bool syntax_error = false;
+    arg_error = false;
 
     if (NULL != strstr(cmd_buffer, CMD_TYPE_HELP))
     {
@@ -118,11 +130,18 @@ static void execute_command(void)
     }
     else if (NULL != strstr(cmd_buffer, CMD_TYPE_GET))
     {
-        ;
+        syntax_error = true;
     }
     else if (NULL != strstr(cmd_buffer, CMD_TYPE_SET))
     {
-        ;
+        if (NULL != strstr(cmd_buffer, SET_HEATER))
+        {
+            set_heater();
+        }
+        else
+        {
+            syntax_error = true;
+        }
     }
     else
     {
@@ -145,9 +164,10 @@ static void execute_command(void)
         uart_write_string(SYNTAX_ERROR);
         uart_write_string(NEWLINE);
     }
-    else
+    else if (arg_error)
     {
-
+        uart_write_string(ARGUMENT_ERROR);
+        uart_write_string(NEWLINE);
     }
 }
 
@@ -163,4 +183,25 @@ static void cmd_test_temp(void)
     uint16_t reading = max6675_read_blocking();
     sprintf(ans, "%04X%s", reading, NEWLINE);
     uart_write_string(ans);
+}
+
+static void set_heater(void)
+{
+    uint8_t * p;
+
+    p = (uint8_t*)strstr(cmd_buffer, SET_HEATER);
+    p += strlen(SET_HEATER);
+    p += 1;     // +1 for space
+
+    if (('o' == *p) && ('n' == *(p + 1)))
+    {
+        HEATER_ON;
+    } else if (('o' == *p) && ('f' == *(p + 1)) && ('f' == *(p + 2)))
+    {
+        HEATER_OFF;
+    }
+    else
+    {
+        arg_error = true;
+    }
 }
