@@ -94,8 +94,6 @@ void terminal_handle_uart_event(void)
 {
     copy_to_cmd_buffer();
     execute_command();
-    
-
 }
 
 // =============================================================================
