@@ -23,8 +23,8 @@ extern "C" {
 // Global constatants
 // =============================================================================
 
-#define SERVER_MAX_POS 1200
-#define SERVER_MIN_POS 0
+#define SERVO_MAX_POS 1200
+#define SERVO_MIN_POS 0
 
 // =============================================================================
 // Public function declarations
