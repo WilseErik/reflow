@@ -7,11 +7,14 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdio.h>
+#include <ctype.h>
+#include <stdlib.h>
 
 #include "uart.h"
 #include "terminal_help.h"
 #include "max6675.h"
 #include "gpio.h"
+#include "servo.h"
 
 // =============================================================================
 // Private type definitions
@@ -57,6 +60,12 @@ static const char CMD_TEST_TEMP[]   = "test temp";
  */
 static const char SET_HEATER[]      = "set heater";
 
+/*§
+ Sets the servo position.
+ Parameter: <position as integer in [0, 1200]>
+ */
+static const char SET_SERVO_POS[]   = "set servo pos";
+
 // =============================================================================
 // Private variables
 // =============================================================================
@@ -85,6 +94,7 @@ static void cmd_hello(void);
 static void cmd_test_temp(void);
 
 static void set_heater(void);
+static void set_servo_pos(void);
 
 // =============================================================================
 // Public function definitions
@@ -135,6 +145,10 @@ static void execute_command(void)
         if (NULL != strstr(cmd_buffer, SET_HEATER))
         {
             set_heater();
+        }
+        else if (NULL != strstr(cmd_buffer, SET_SERVO_POS))
+        {
+            set_servo_pos();
         }
         else
         {
@@ -202,4 +216,44 @@ static void set_heater(void)
     {
         arg_error = true;
     }
+}
+
+static void set_servo_pos(void)
+{
+    uint8_t * p;
+    char arg[5] = {0};
+
+    p = (uint8_t*)strstr(cmd_buffer, SET_SERVO_POS);
+    p += strlen(SET_SERVO_POS);
+    p += 1;     // +1 for space
+
+    if (!isdigit(*p))
+    {
+        arg_error = true;
+    }
+    else
+    {
+        uint8_t i = 0;
+        uint16_t pos;
+
+        while ((i != 5) && isdigit(*p))
+        {
+            arg[i++] = *(p++);
+        }
+
+        arg[i] = NULL;
+
+        pos = (uint16_t)atoi(arg);
+
+        if ((pos > 0) && (pos <= 1200))
+        {
+            servo_set_pos(pos);
+        }
+        else
+        {
+            arg_error = true;
+        }
+    }
+
+
 }

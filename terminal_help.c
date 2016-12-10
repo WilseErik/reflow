@@ -19,12 +19,16 @@ void terminal_help(char* in)
     {
         uart_write_string("\tSets the heater on or off.\n\r\tParameter: <'on' or 'off'>\n\r\t\n\r");
     }
+    else if (NULL != strstr(in, "set servo pos"))
+    {
+        uart_write_string("\tSets the servo position.\n\r\tParameter: <position as integer in [0, 1200]>\n\r\t\n\r");
+    }
     else
     {
         uart_write_string("\tType \"help <command>\" for more info\n\r");
         uart_write_string("\tAvailible commands:\n\r");
         uart_write_string("\t------------------------------------\n\r");
-        uart_write_string("\thello\n\r\tset heater\n\r\ttest temp\n\r\t");
+        uart_write_string("\thello\n\r\tset heater\n\r\tset servo pos\n\r\ttest temp\n\r\t");
         uart_write_string("\n\r");
     }
 }
