@@ -23,6 +23,9 @@ extern "C" {
 // Global constatants
 // =============================================================================
 
+#define SERVER_MAX_POS 1200
+#define SERVER_MIN_POS 0
+
 // =============================================================================
 // Public function declarations
 // =============================================================================
@@ -34,7 +37,7 @@ void servo_init(void);
 
 /**
  * @brief Sets the target position of the servo.
- * @param position      target position to set.
+ * @param position      target position to set in [0, 1200].
  */
 void servo_set_pos(uint16_t position);
 
