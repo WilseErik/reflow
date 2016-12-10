@@ -10,6 +10,7 @@
 #include "timers.h"
 #include "buttons.h"
 #include "max6675.h"
+#include "servo.h"
 
 // =============================================================================
 // Private type definitions
@@ -56,6 +57,8 @@ void init(void)
     buttons_init();
     max6675_init();
     timers_start_msec_timer();
+    servo_init();
+    servo_set_pos(SERVO_MIN_POS);
 }
 
 // =============================================================================
