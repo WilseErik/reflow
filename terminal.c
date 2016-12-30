@@ -15,6 +15,7 @@
 #include "max6675.h"
 #include "gpio.h"
 #include "servo.h"
+#include "flash.h"
 
 // =============================================================================
 // Private type definitions
@@ -27,6 +28,10 @@
 // =============================================================================
 // Private constants
 // =============================================================================
+
+#define HEX_BYTE_STR_LEN  (2 + 1)
+#define HEX_WORD_STR_LEN  (4 + 1)
+#define HEX_DWORD_STR_LEN (8 + 1)
 
 static const char NEWLINE[]         = "\r\n";
 
@@ -55,6 +60,13 @@ static const char CMD_HELLO[]       = "hello";
 static const char CMD_TEST_TEMP[]   = "test temp";
 
 /*§
+ Gets one byte from the flash data memory.
+ Parameter: <index in hex format>
+ Returns: <hex value of byte at specified index>
+ */
+static const char GET_FLASH[]       = "get flash";
+
+/*§
  Sets the heater on or off.
  Parameter: <'on' or 'off'>
  */
@@ -65,6 +77,12 @@ static const char SET_HEATER[]      = "set heater";
  Parameter: <position as integer in [0, 1200]>
  */
 static const char SET_SERVO_POS[]   = "set servo pos";
+
+/*§
+ Sets one byte in the flash data memory.
+ Paramter: <index in hex format> <one byte value in hex format>
+ */
+static const char SET_FLASH[]       = "set flash";
 
 // =============================================================================
 // Private variables
@@ -93,8 +111,11 @@ static void execute_command(void);
 static void cmd_hello(void);
 static void cmd_test_temp(void);
 
+static void get_flash(void);
+
 static void set_heater(void);
 static void set_servo_pos(void);
+static void set_flash(void);
 
 // =============================================================================
 // Public function definitions
@@ -138,7 +159,14 @@ static void execute_command(void)
     }
     else if (NULL != strstr(cmd_buffer, CMD_TYPE_GET))
     {
-        syntax_error = true;
+        if (NULL != strstr(cmd_buffer, GET_FLASH))
+        {
+            get_flash();
+        }
+        else
+        {
+            syntax_error = true;
+        }
     }
     else if (NULL != strstr(cmd_buffer, CMD_TYPE_SET))
     {
@@ -149,6 +177,10 @@ static void execute_command(void)
         else if (NULL != strstr(cmd_buffer, SET_SERVO_POS))
         {
             set_servo_pos();
+        }
+        else if (NULL != strstr(cmd_buffer, SET_FLASH))
+        {
+            set_flash();
         }
         else
         {
@@ -195,6 +227,54 @@ static void cmd_test_temp(void)
     uint16_t reading = max6675_read_blocking();
     sprintf(ans, "%04X%s", reading, NEWLINE);
     uart_write_string(ans);
+}
+
+static void get_flash(void)
+{
+    uint8_t * p;
+    char address_arg[HEX_WORD_STR_LEN] = {0};
+
+    p = (uint8_t*)strstr(cmd_buffer, GET_FLASH);
+    p += strlen(GET_FLASH);
+    p += 1;     // +1 for space
+
+    if (!isxdigit(*p))
+    {
+        arg_error = true;
+    }
+    else
+    {
+        uint8_t i = 0;
+        uint16_t address;
+
+        //
+        // Parse address argument
+        //
+        while ((i != HEX_WORD_STR_LEN) && isxdigit(*p))
+        {
+            address_arg[i++] = *(p++);
+        }
+
+        address_arg[i] = NULL;
+        address = (uint16_t)strtol(address_arg, NULL, 16);
+
+        //
+        // Perform flash read
+        //
+        if (address < FLASH_MEM_SIZE)
+        {
+            uint8_t value;
+            char ans[32];
+            
+            value = flash_read_byte((flash_index_t)address);
+            sprintf(ans, "%02X%s", value, NEWLINE);
+            uart_write_string(ans);
+        }
+        else
+        {
+            arg_error = true;
+        }
+    }
 }
 
 static void set_heater(void)
@@ -254,6 +334,67 @@ static void set_servo_pos(void)
             arg_error = true;
         }
     }
+}
 
+static void set_flash(void)
+{
+    uint8_t * p;
+    char address_arg[HEX_WORD_STR_LEN] = {0};
+    char value_arg[HEX_BYTE_STR_LEN] = {0};
 
+    p = (uint8_t*)strstr(cmd_buffer, SET_FLASH);
+    p += strlen(SET_FLASH);
+    p += 1;     // +1 for space
+
+    if (!isxdigit(*p))
+    {
+        arg_error = true;
+    }
+    else
+    {
+        uint8_t i = 0;
+        uint16_t address;
+        uint8_t value;
+
+        //
+        // Parse address argument
+        //
+        while ((i != HEX_WORD_STR_LEN) && isxdigit(*p))
+        {
+            address_arg[i++] = *(p++);
+        }
+
+        address_arg[i] = NULL;
+        arg_error = arg_error || (i == 0);
+        address = (uint16_t)strtol(address_arg, NULL, 16);
+
+        //
+        // Parse value argument
+        //
+        p += 1; // +1 for space
+        i = 0;
+        
+        while ((i != HEX_BYTE_STR_LEN) && isxdigit(*p))
+        {
+            value_arg[i++] = *(p++);
+        }
+
+        value_arg[i] = NULL;
+        arg_error = arg_error || (i == 0);
+        value = (uint8_t)strtol(value_arg, NULL, 16);
+        
+        //
+        // Perform flash write
+        //
+        if (!arg_error && (address < FLASH_MEM_SIZE))
+        {
+            flash_init_write_buffer();
+            flash_write_byte_to_buffer((flash_index_t)address, value);
+            flash_write_buffer_to_flash();
+        }
+        else
+        {
+            arg_error = true;
+        }
+    }
 }
