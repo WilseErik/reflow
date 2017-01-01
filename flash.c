@@ -2,9 +2,9 @@
  * This file allows the use of a part of the instruction memory to be used
  * as non volatile data memory.
  *
- * In this implemententation only the 16 MSB of each instruction (24 bits) will
+ * In this implemententation only the 16 LSB of each instruction (24 bits) will
  * be used for data storage. This of course consumes more memory, but speeds
- * up flash address calculation wich in turn imporves read speeds significantly.
+ * up flash address calculation wich in turn improves read speeds significantly.
  *
  * One instruction in the flash memory:
  *
@@ -14,6 +14,11 @@
  *             BIT0    -    BIT15                  BIT16 -  BIT23
  *
  *
+ * References:
+ * Document number: DS30009715C, PIC24F Flash Program Memory
+ * Document number: DS39715A, Section 4. Program Memory
+ * Document number: DS39747D, PIC24FJ128GA010 Family Data Sheet
+ * Document number: DS51284F, MPLAB C30 C COMPILER USER?S GUIDE
  * 
  */
 
@@ -42,7 +47,10 @@
 // Private constants
 // =============================================================================
 
-#define DATA_SECTOR_ADDR 0
+#define INSTRUCTIONS_PER_ROW            64
+#define ROWS_PER_ERASE_BLOCK            8
+#define INSTRUCTIONS_PER_ERASE_BLOCK    512
+#define WORDS_PER_ERASE_BLOCK           INSTRUCTIONS_PER_ERASE_BLOCK
 
 // =============================================================================
 // Private variables
@@ -50,9 +58,51 @@
 
 static volatile uint8_t buffer[FLASH_MEM_SIZE];
 
+const uint16_t flash_data[WORDS_PER_ERASE_BLOCK] __attribute__((space(prog),aligned(WORDS_PER_ERASE_BLOCK))) =
+{
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,    // 0x0000
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,    // 0x0008
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,    // 0x0010
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,    // 0x0018
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,    // 0x0020
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,    // 0x0028
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,    // 0x0030
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,    // 0x0038
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,    // 0x0040
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,    // 0x0048
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,    // 0x0050
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,    // 0x0058
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,    // 0x0060
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,    // 0x0068
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,    // 0x0070
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,    // 0x0078
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,    // 0x0080
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,    // 0x0088
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,    // 0x0090
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,    // 0x0098
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,    // 0x00A0
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,    // 0x00A8
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,    // 0x00B0
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,    // 0x00B8
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,    // 0x00C0
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,    // 0x00C8
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,    // 0x00D0
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,    // 0x00D8
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,    // 0x00E0
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,    // 0x00E8
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,    // 0x00F0
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000     // 0x00F8
+};
+
 // =============================================================================
 // Private function declarations
 // =============================================================================
+
+
+/**
+ * @brief Erases the address page used for data.
+ */
+static void erase_flash_data(void);
 
 // =============================================================================
 // Public function definitions
@@ -80,20 +130,21 @@ uint16_t flash_read_word(flash_index_t index)
 {
     uint16_t addr_offset;
     uint16_t read_word;
-    uint16_t addr = DATA_SECTOR_ADDR + (uint16_t)index;
-    bool odd_addr = (0 != (addr & 0x0001));
+    uint16_t index_offset = (uint16_t)index & 0xFFFE;
+    bool odd_addr = (0 != ((uint16_t)index & 0x0001));
 
-    TBLPAG = ((addr & 0x7F0000) >> 16);
-    addr_offset = (addr & 0x00FFFE);
-    asm("tblrdh.w [%1], %0" : "=r"(read_word) : "r"(addr_offset));
+    TBLPAG = __builtin_tblpage(flash_data);
+    addr_offset = __builtin_tbloffset(flash_data) + index_offset;
+    asm("tblrdl.w [%1], %0" : "=r"(read_word) : "r"(addr_offset));
 
     if (odd_addr)
     {
         uint16_t high_word;
 
-        TBLPAG = ((addr & 0x7F0000) >> 16);
-        addr_offset = (addr & 0x00FFFF);
-        asm("tblrdh.w [%1], %0" : "=r"(high_word) : "r"(addr_offset));
+        index_offset += 1;
+        TBLPAG = __builtin_tblpage(flash_data);
+        addr_offset = __builtin_tbloffset(flash_data) + index_offset;
+        asm("tblrdl.w [%1], %0" : "=r"(high_word) : "r"(addr_offset));
 
         read_word = (read_word << 8) | (0x00FF & (high_word >> 8));
     }
@@ -179,9 +230,55 @@ Section 4.6.4.2 ?NVMKEY Register?.
  */
 void flash_write_buffer_to_flash(void)
 {
-    //
-    // Block erase
-    //
+    uint8_t row;
+    uint8_t instr;
+    uint16_t offset;
+    uint16_t buffer_index;
+
+    erase_flash_data();
+
+    // Memory row program operation (ERASE = 0) or no operation (ERASE = 1)
+    NVMCONbits.NVMOP = 1;
+    NVMCONbits.ERASE = 0;
+    NVMCONbits.WREN = 1;
+
+    offset = __builtin_tbloffset(flash_data);
+    buffer_index = 0;
+
+    for (row = 0; row != ROWS_PER_ERASE_BLOCK; ++row)
+    {
+        for (instr = 0; instr != INSTRUCTIONS_PER_ROW; ++instr)
+        {
+            uint16_t low_word;
+            uint8_t dummy_data = 0x00;
+
+            low_word  = (uint16_t)buffer[buffer_index++] << 8;
+            low_word |= (uint16_t)buffer[buffer_index++];
+
+            __builtin_tblwtl((offset + (instr * 2)), low_word);
+            __builtin_tblwth((offset + (instr * 2)), dummy_data);
+        }
+        __builtin_disi(5);
+        __builtin_write_NVM();
+
+        while (NVMCONbits.WR)
+        {
+            ;
+        }
+    }  
+}
+
+// =============================================================================
+// Private function definitions
+// =============================================================================
+
+/**
+ * Reference: DS30009715C-page 16
+ */
+static void erase_flash_data(void)
+{
+    uint16_t addr_offset;
+
     NVMCONbits.NVMOP = 0x2;     // Erase block
 
     // Perform the erase operation specified by NVMOP3:NVMOP0 on the next WR command
@@ -190,17 +287,17 @@ void flash_write_buffer_to_flash(void)
     // Enable Flash program/erase operations
     NVMCONbits.WREN = 1;
 
+    // Set up the address
+    TBLPAG = __builtin_tblpage(flash_data);
+    addr_offset = __builtin_tbloffset(flash_data);
+    __builtin_tblwtl(addr_offset, 0); // Dummy TBLWT to load address
+
     // Start sequence accoding to doc: DS39715A-page 4-16
-    NVMKEY = 0x55;
-    NVMKEY = 0xAA;
-    NVMCONbits.WR = 1;
-    Nop();
-    Nop();
+    __builtin_disi(5);
+    __builtin_write_NVM();  
+
+    while (NVMCONbits.WR)
+    {
+        ;
+    }
 }
-
-// =============================================================================
-// Private function definitions
-// =============================================================================
-
-
-
