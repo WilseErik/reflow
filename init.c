@@ -11,6 +11,8 @@
 #include "buttons.h"
 #include "max6675.h"
 #include "servo.h"
+#include "control.h"
+#include "fixed_point.h"
 
 // =============================================================================
 // Private type definitions
@@ -59,6 +61,11 @@ void init(void)
     timers_start_msec_timer();
     servo_init();
     servo_set_pos(SERVO_MIN_POS);
+
+    control_set_kp((q16_16_t)flash_read_word(FLASH_INDEX_KP));
+    control_set_ki((q16_16_t)flash_read_word(FLASH_INDEX_KI));
+    control_set_kd((q16_16_t)flash_read_word(FLASH_INDEX_KD));
+    control_start();
 }
 
 // =============================================================================
