@@ -135,8 +135,10 @@ static inline uint16_t q16_16_to_int(q16_16_t t)
  */
 static inline q16_16_t double_to_q16_16(double d)
 {
-    return (q16_16_t)(d * UINT16_MAX);
+    return (q16_16_t)(d * 65536UL);
 }
+
+#define DOUBLE_TO_Q16_16(d) ((q16_16_t)(d * 65536UL))
 
 /**
  * @brief Converts a q16_16_t value to a double.
@@ -145,7 +147,7 @@ static inline q16_16_t double_to_q16_16(double d)
  */
 static inline double q16_16_to_double(q16_16_t x)
 {
-    return ((double)x) / ((double)UINT16_MAX);
+    return ((double)x) / ((double)65536UL);
 }
 
 #ifdef	__cplusplus
