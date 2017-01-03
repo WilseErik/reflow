@@ -16,6 +16,7 @@
 #include "gpio.h"
 #include "servo.h"
 #include "flash.h"
+#include "control.h"
 
 // =============================================================================
 // Private type definitions
@@ -67,6 +68,24 @@ static const char CMD_TEST_TEMP[]   = "test temp";
 static const char GET_FLASH[]       = "get flash";
 
 /*§
+ Gets the Kp constant in the PID regulator.
+ Returns: <Kp value as  a decimal value>
+ */
+static const char GET_PID_KP[]      = "get kp";
+
+/*§
+ Gets the Ip constant in the PID regulator.
+ Returns: <Ip value as  a decimal value>
+ */
+static const char GET_PID_KI[]      = "get ki";
+
+/*§
+ Gets the Dp constant in the PID regulator.
+ Returns: <Dp value as  a decimal value>
+ */
+static const char GET_PID_KD[]      = "get kd";
+
+/*§
  Sets the heater on or off.
  Parameter: <'on' or 'off'>
  */
@@ -83,6 +102,24 @@ static const char SET_SERVO_POS[]   = "set servo pos";
  Paramter: <index in hex format> <one byte value in hex format>
  */
 static const char SET_FLASH[]       = "set flash";
+
+/*§
+ Sets the Kp constant in the PID regulator.
+ Parameter: <Value in the range [-65535.0, 65535.0]>
+ */
+static const char SET_PID_KP[]      = "set kp";
+
+/*§
+ Sets the Ki constant in the PID regulator.
+ Parameter: <Value in the range [-65535.0, 65535.0]>
+ */
+static const char SET_PID_KI[]      = "set ki";
+
+/*§
+ Sets the Kd constant in the PID regulator.
+ Parameter: <Value in the range [-65535.0, 65535.0]>
+ */
+static const char SET_PID_KD[]      = "set kd";
 
 // =============================================================================
 // Private variables
@@ -113,9 +150,17 @@ static void cmd_test_temp(void);
 
 static void get_flash(void);
 
+static void get_pid_kp(void);
+static void get_pid_ki(void);
+static void get_pid_kd(void);
+
 static void set_heater(void);
 static void set_servo_pos(void);
 static void set_flash(void);
+
+static void set_pid_kp(void);
+static void set_pid_ki(void);
+static void set_pid_kd(void);
 
 // =============================================================================
 // Public function definitions
@@ -163,6 +208,18 @@ static void execute_command(void)
         {
             get_flash();
         }
+        else if (NULL != strstr(cmd_buffer, GET_PID_KP))
+        {
+            get_pid_kp();
+        }
+        else if (NULL != strstr(cmd_buffer, GET_PID_KI))
+        {
+            get_pid_ki();
+        }
+        else if (NULL != strstr(cmd_buffer, GET_PID_KD))
+        {
+            get_pid_kd();
+        }
         else
         {
             syntax_error = true;
@@ -181,6 +238,18 @@ static void execute_command(void)
         else if (NULL != strstr(cmd_buffer, SET_FLASH))
         {
             set_flash();
+        }
+        else if (NULL != strstr(cmd_buffer, SET_PID_KP))
+        {
+            set_pid_kp();
+        }
+        else if (NULL != strstr(cmd_buffer, SET_PID_KI))
+        {
+            set_pid_ki();
+        }
+        else if (NULL != strstr(cmd_buffer, SET_PID_KD))
+        {
+            set_pid_kd();
         }
         else
         {
@@ -275,6 +344,29 @@ static void get_flash(void)
             arg_error = true;
         }
     }
+}
+
+static void get_pid_kp(void)
+{
+    char ans[32];
+
+    sprintf(ans, "%lf%s", q16_16_to_double(control_get_kp()), NEWLINE);
+    uart_write_string(ans);
+}
+
+static void get_pid_ki(void)
+{
+    char ans[32];
+
+    sprintf(ans, "%lf%s", q16_16_to_double(control_get_ki()), NEWLINE);
+    uart_write_string(ans);
+}
+static void get_pid_kd(void)
+{
+    char ans[32];
+
+    sprintf(ans, "%lf%s", q16_16_to_double(control_get_kd()), NEWLINE);
+    uart_write_string(ans);
 }
 
 static void set_heater(void)
@@ -396,5 +488,101 @@ static void set_flash(void)
         {
             arg_error = true;
         }
+    }
+}
+
+static void set_pid_kp(void)
+{
+    uint8_t * p;
+    char arg[16] = {0};
+    uint8_t i = 0;
+
+    p = (uint8_t*)strstr(cmd_buffer, SET_PID_KP);
+    p += strlen(SET_PID_KP);
+    p += 1;     // +1 for space
+
+    while (isdigit(*p) || ('-' == *p))
+    {
+        arg[i++] = *(p++);
+    }
+
+    arg[i] = NULL;
+
+    arg_error = (0 == i);
+
+    if (!arg_error)
+    {
+        double kp_as_double = atoi(arg);
+        q16_16_t kp = double_to_q16_16(kp_as_double);
+
+        control_set_kp(kp);
+        
+        flash_init_write_buffer();
+        flash_write_word_to_buffer(FLASH_INDEX_KP, (uint16_t)kp);
+        flash_write_buffer_to_flash();
+    }
+}
+
+static void set_pid_ki(void)
+{
+    uint8_t * p;
+    char arg[16] = {0};
+    uint8_t i = 0;
+
+    p = (uint8_t*)strstr(cmd_buffer, SET_PID_KI);
+    p += strlen(SET_PID_KI);
+    p += 1;     // +1 for space
+
+    while (isdigit(*p) || ('-' == *p))
+    {
+        arg[i++] = *(p++);
+    }
+
+    arg[i] = NULL;
+
+    arg_error = (0 == i);
+
+    if (!arg_error)
+    {
+        double ki_as_double = atoi(arg);
+        q16_16_t ki = double_to_q16_16(ki_as_double);
+
+        control_set_ki(ki);
+
+        flash_init_write_buffer();
+        flash_write_word_to_buffer(FLASH_INDEX_KI, (uint16_t)ki);
+        flash_write_buffer_to_flash();
+    }
+}
+
+static void set_pid_kd(void)
+{
+    uint8_t * p;
+    char arg[16] = {0};
+    uint8_t i = 0;
+
+    p = (uint8_t*)strstr(cmd_buffer, SET_PID_KD);
+    p += strlen(SET_PID_KD);
+    p += 1;     // +1 for space
+
+    while (isdigit(*p) || ('-' == *p))
+    {
+        arg[i++] = *(p++);
+    }
+
+    arg[i] = NULL;
+
+    arg_error = (0 == i);
+
+    if (!arg_error)
+    {
+        double kd_as_double = atoi(arg);
+        q16_16_t kd = double_to_q16_16(kd_as_double);
+
+        control_set_kd(kd);
+
+        flash_init_write_buffer();
+        flash_write_word_to_buffer(FLASH_INDEX_KD, (uint16_t)kd);
+        flash_write_buffer_to_flash();
     }
 }
