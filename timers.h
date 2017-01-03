@@ -39,6 +39,22 @@ void timers_start_msec_timer(void);
  */
 uint32_t timers_get_millis(void);
 
+/**
+ * @brief Activates the heater pwm control.
+ */
+void timers_activate_heater_control(void);
+
+/**
+ * @breif Deactivates the heater element pwm control and turns off the heater.
+ */
+void timers_deactivate_heater_control(void);
+
+/**
+ * @bruef Sets the duty cycle of the heater element.
+ * @param duty - Duty cycle in range [0, 50].
+ */
+void timers_set_heater_duty(uint8_t duty);
+
 #ifdef	__cplusplus
 }
 #endif

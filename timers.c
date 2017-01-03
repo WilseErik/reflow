@@ -42,13 +42,23 @@ static uint32_t MSEC_TIMER_FREQ_HZ = 1000;
 
 #define TCS_INTERNAL_CLOCK                              0
 
+//
+// Heater PWM
+//
+static uint16_t HEATER_PWM_INTERVAL_20MS     = 50;
+
 // =============================================================================
 // Private variables
 // =============================================================================
 static volatile uint16_t prescaler_10ms = 0;
+static volatile uint16_t prescaler_20ms = 0;
 static volatile uint16_t prescaler_250ms = 0;
 
 static volatile uint32_t current_time = 0;
+
+static volatile bool heater_control_on = false;
+static volatile uint16_t heater_timer_20ms = 0;
+static volatile uint16_t heater_duty = 0;
 
 // =============================================================================
 // Private function declarations
@@ -127,6 +137,28 @@ uint32_t timers_get_millis(void)
     return t1;
 }
 
+void timers_activate_heater_control(void)
+{
+    heater_control_on = true;
+}
+
+void timers_deactivate_heater_control(void)
+{
+    heater_control_on = false;
+}
+
+void timers_set_heater_duty(uint8_t duty)
+{
+    if (duty <= 50)
+    {
+        heater_duty = duty;
+    }
+    else
+    {
+        heater_duty = 50;
+    }
+}
+
 // =============================================================================
 // Private function definitions
 // =============================================================================
@@ -145,6 +177,31 @@ void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void)
 
         status_set(STATUS_START_TEMP_READING_FLAG, true);
         status_set(STATUS_RUN_PID_FLAG, true);
+    }
+
+    if (20 == ++prescaler_20ms)
+    {
+        prescaler_20ms = 0;
+        
+        if (HEATER_PWM_INTERVAL_20MS == heater_timer_20ms)
+        {
+            heater_timer_20ms = 0;
+
+            if (heater_control_on)
+            {
+                HEATER_ON;
+            }
+        }
+
+        if (heater_timer_20ms == heater_duty)
+        {
+            if (heater_control_on)
+            {
+                HEATER_OFF;
+            }
+        }
+
+        ++heater_timer_20ms;
     }
 
     if (250 == ++prescaler_250ms)
