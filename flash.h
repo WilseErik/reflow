@@ -30,7 +30,17 @@ extern "C" {
 
 typedef enum
 {
-    FLASH_INDEX_WDT_RESETS
+    FLASH_INDEX_WDT_RESETS  = 0x00,
+
+    //
+    // PID Control parameters
+    //
+    FLASH_INDEX_KP          = 0x02,
+    FLASH_INDEX_KP_LOW      = 0x03,
+    FLASH_INDEX_KI          = 0x04,
+    FLASH_INDEX_KI_LOW      = 0x05,
+    FLASH_INDEX_KD          = 0x06,
+    FLASH_INDEX_KD_LOW      = 0x07
 } flash_index_t;
 
 // =============================================================================
