@@ -13,6 +13,7 @@
 #include "servo.h"
 #include "control.h"
 #include "fixed_point.h"
+#include "flash.h"
 
 // =============================================================================
 // Private type definitions
