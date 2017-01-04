@@ -63,9 +63,9 @@ void init(void)
     servo_init();
     servo_set_pos(SERVO_MIN_POS);
 
-    control_set_kp((q16_16_t)flash_read_word(FLASH_INDEX_KP));
-    control_set_ki((q16_16_t)flash_read_word(FLASH_INDEX_KI));
-    control_set_kd((q16_16_t)flash_read_word(FLASH_INDEX_KD));
+    control_set_kp((q16_16_t)flash_read_dword(FLASH_INDEX_KP));
+    control_set_ki((q16_16_t)flash_read_dword(FLASH_INDEX_KI));
+    control_set_kd((q16_16_t)flash_read_dword(FLASH_INDEX_KD));
     control_start();
 }
 

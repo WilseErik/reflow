@@ -38,11 +38,8 @@ typedef enum
     // PID Control parameters
     //
     FLASH_INDEX_KP          = 0x02,
-    FLASH_INDEX_KP_LOW      = 0x03,
-    FLASH_INDEX_KI          = 0x04,
-    FLASH_INDEX_KI_LOW      = 0x05,
-    FLASH_INDEX_KD          = 0x06,
-    FLASH_INDEX_KD_LOW      = 0x07,
+    FLASH_INDEX_KI          = 0x06,
+    FLASH_INDEX_KD          = 0x0A,
 
     //
     // Temperature curve
