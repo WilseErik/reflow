@@ -23,11 +23,11 @@ void terminal_help(char* in)
     {
         uart_write_string("\tGets the Kp constant in the PID regulator.\n\r\tReturns: <Kp value as  a decimal value>\n\r\t\n\r");
     }
-    else if (NULL != strstr(in, "get ip"))
+    else if (NULL != strstr(in, "get ki"))
     {
         uart_write_string("\tGets the Ip constant in the PID regulator.\n\r\tReturns: <Ip value as  a decimal value>\n\r\t\n\r");
     }
-    else if (NULL != strstr(in, "get dp"))
+    else if (NULL != strstr(in, "get kd"))
     {
         uart_write_string("\tGets the Dp constant in the PID regulator.\n\r\tReturns: <Dp value as  a decimal value>\n\r\t\n\r");
     }
@@ -60,7 +60,7 @@ void terminal_help(char* in)
         uart_write_string("\tType \"help <command>\" for more info\n\r");
         uart_write_string("\tAvailible commands:\n\r");
         uart_write_string("\t------------------------------------\n\r");
-        uart_write_string("\tget dp\n\r\tget flash\n\r\tget ip\n\r\tget kp\n\r\thello\n\r\tset flash\n\r\tset heater\n\r\tset kd\n\r\tset ki\n\r\tset kp\n\r\tset servo pos\n\r\ttest temp\n\r\t");
+        uart_write_string("\tget flash\n\r\tget kd\n\r\tget ki\n\r\tget kp\n\r\thello\n\r\tset flash\n\r\tset heater\n\r\tset kd\n\r\tset ki\n\r\tset kp\n\r\tset servo pos\n\r\ttest temp\n\r\t");
         uart_write_string("\n\r");
     }
 }

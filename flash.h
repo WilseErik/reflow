@@ -24,6 +24,8 @@ extern "C" {
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "temp_curve.h"
+    
 // =============================================================================
 // Public type definitions
 // =============================================================================
@@ -40,7 +42,26 @@ typedef enum
     FLASH_INDEX_KI          = 0x04,
     FLASH_INDEX_KI_LOW      = 0x05,
     FLASH_INDEX_KD          = 0x06,
-    FLASH_INDEX_KD_LOW      = 0x07
+    FLASH_INDEX_KD_LOW      = 0x07,
+
+    //
+    // Temperature curve
+    //
+    FLASH_INDEX_LEAD_FREE_TEMP_CURVE_SIZE   = 0x100,
+    FLASH_INDEX_LEAD_FREE_SOAK_START_SEC    = 0x102,
+    FLASH_INDEX_LEAD_FREE_REFLOW_START_SEC  = 0x104,
+    FLASH_INDEX_LEAD_FREE_COOL_START_SEC    = 0x106,
+    FLASH_INDEX_LEAD_FREE_TEMP_CURVE_START  = 0x108,
+            // index 0x108 - 0x1FF reserved for lead free temp. curve data.
+    FLASH_INDEX_LEAD_FREE_TEMP_CURVE_END    = 0x1FF,
+
+    FLASH_INDEX_LEAD_TEMP_CURVE_SIZE        = 0x200,
+    FLASH_INDEX_LEAD_SOAK_START_SEC         = 0x202,
+    FLASH_INDEX_LEAD_REFLOW_START_SEC       = 0x204,
+    FLASH_INDEX_LEAD_COOL_START_SEC         = 0x206,
+    FLASH_INDEX_LEAD_TEMP_CURVE_START       = 0x208,
+            // index 0x208 - 0x2FF reserved for lead free temp. curve data.
+    FLASH_INDEX_LEAD_TEMP_CURVE_END         = 0x2FF,
 } flash_index_t;
 
 // =============================================================================
