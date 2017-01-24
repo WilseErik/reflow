@@ -55,6 +55,18 @@ void timers_deactivate_heater_control(void);
  */
 void timers_set_heater_duty(uint8_t duty);
 
+/**
+ * @brief Gets the amount of seconds passed since the current reflow program
+ *        was started.
+ * @return Time since current reflow program was started in seconds.
+ */
+uint16_t timers_get_reflow_time(void);
+
+/**
+ * @brief Sets the time since the relow program was started to 0.
+ */
+void timers_reset_reflow_time(void);
+
 #ifdef	__cplusplus
 }
 #endif

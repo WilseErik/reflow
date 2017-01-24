@@ -53,12 +53,15 @@ static uint16_t HEATER_PWM_INTERVAL_20MS     = 50;
 static volatile uint16_t prescaler_10ms = 0;
 static volatile uint16_t prescaler_20ms = 0;
 static volatile uint16_t prescaler_250ms = 0;
+static volatile uint16_t prescaler_1000ms = 0;
 
 static volatile uint32_t current_time = 0;
 
 static volatile bool heater_control_on = false;
 static volatile uint16_t heater_timer_20ms = 0;
 static volatile uint16_t heater_duty = 0;
+
+static volatile uint16_t reflow_time = 0;
 
 // =============================================================================
 // Private function declarations
@@ -123,8 +126,8 @@ void timers_start_msec_timer(void)
 
 uint32_t timers_get_millis(void)
 {
-    uint32_t t1;
-    uint32_t t2;
+    volatile uint32_t t1;
+    volatile uint32_t t2;
 
     // Avoid incorrect readings of current_time due to preemption by T1 isr.
     do
@@ -157,6 +160,30 @@ void timers_set_heater_duty(uint8_t duty)
     {
         heater_duty = 50;
     }
+}
+
+uint16_t timers_get_reflow_time(void)
+{
+    volatile uint16_t t1;
+    volatile uint16_t t2;
+
+    // Prevent incorrect reads due to timer isr
+    do
+    {
+        t1 = reflow_time;
+        t2 = reflow_time;
+    } while (t1 != t2);
+
+    return t1;
+}
+
+void timers_reset_reflow_time(void)
+{
+    // Prevent incorrect writes due to timer isr
+    do
+    {
+        reflow_time = 0;
+    } while (reflow_time != 0);
 }
 
 // =============================================================================
@@ -212,4 +239,11 @@ void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void)
         status_set(STATUS_UART_LOG_TEMP_FLAG, true);
     }
 
+    if (1000 == ++prescaler_1000ms)
+    {
+        prescaler_1000ms = 0;
+
+        ++reflow_time;
+        status_set(STATUS_UPDATE_TARGET_TEMP_FLAG, true);
+    }
 }

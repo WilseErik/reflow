@@ -17,6 +17,8 @@
 #include "lcd.h"
 #include "uart.h"
 #include "terminal.h"
+#include "control.h"
+#include "temp_curve.h"
 
 // =============================================================================
 // Private type definitions
@@ -58,6 +60,11 @@ int main(void)
         if (status_check(STATUS_STOP_BUTTON_PUSHED_FLAG))
         {
             status_clear(STATUS_STOP_BUTTON_PUSHED_FLAG);
+
+            status_set(STATUS_REFLOW_PROGRAM_ACTIVE, false);
+            timers_deactivate_heater_control();
+            HEATER_OFF;
+            
             buttons_stop_pushed();
         }
         //
@@ -97,6 +104,16 @@ int main(void)
         {
             status_clear(STATUS_START_TEMP_READING_FLAG);
             max6675_start_temp_reading();
+        }
+        else if (status_check(STATUS_UPDATE_TARGET_TEMP_FLAG))
+        {
+            status_clear(STATUS_UPDATE_TARGET_TEMP_FLAG);
+
+            if (status_check(STATUS_REFLOW_PROGRAM_ACTIVE))
+            {
+                control_set_target_value(
+                        temp_curve_eval(timers_get_reflow_time()));
+            }
         }
         //
         // Refresh LCD screen
