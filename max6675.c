@@ -158,8 +158,8 @@ uint16_t max6675_get_current_temp(void)
 
 uint32_t max6675_get_last_reading_time(void)
 {
-    uint32_t t1;
-    uint32_t t2;
+    volatile uint32_t t1;
+    volatile uint32_t t2;
 
     // Avoid that _SPI1Interrupt preempts and changes last_reading_timestamp
     // during an assignment.
