@@ -132,7 +132,7 @@ q16_16_t control_update_pid(q16_16_t current_reading)
     return ret_val;
 }
 
-void control_set_target_temperature(q16_16_t target_value)
+void control_set_target_value(q16_16_t target_value)
 {
     reference_val = target_value;
 }
