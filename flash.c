@@ -50,7 +50,7 @@
 #define INSTRUCTIONS_PER_ROW            64
 #define ROWS_PER_ERASE_BLOCK            8
 #define INSTRUCTIONS_PER_ERASE_BLOCK    512
-#define WORDS_PER_ERASE_BLOCK           INSTRUCTIONS_PER_ERASE_BLOCK
+#define WORDS_PER_ERASE_BLOCK           (INSTRUCTIONS_PER_ERASE_BLOCK * 2)
 
 // =============================================================================
 // Private variables
@@ -112,7 +112,7 @@ uint8_t flash_read_byte(flash_index_t index)
 {
     uint16_t data;
     uint8_t ret_val;
-    data = flash_read_word(index & 0x0001);
+    data = flash_read_word(index & ~0x0001);
 
     if (index & 0x0001)
     {
@@ -230,8 +230,8 @@ Section 4.6.4.2 ?NVMKEY Register?.
  */
 void flash_write_buffer_to_flash(void)
 {
-    uint8_t row;
-    uint8_t instr;
+    uint16_t row;
+    uint16_t instr;
     uint16_t offset;
     uint16_t buffer_index;
 
@@ -242,21 +242,25 @@ void flash_write_buffer_to_flash(void)
     NVMCONbits.ERASE = 0;
     NVMCONbits.WREN = 1;
 
+    TBLPAG = __builtin_tblpage(flash_data);
     offset = __builtin_tbloffset(flash_data);
     buffer_index = 0;
 
     for (row = 0; row != ROWS_PER_ERASE_BLOCK; ++row)
     {
+        uint16_t row_offset = row * (uint16_t)INSTRUCTIONS_PER_ROW * 2;
+        
         for (instr = 0; instr != INSTRUCTIONS_PER_ROW; ++instr)
         {
             uint16_t low_word;
             uint8_t dummy_data = 0x00;
+            uint16_t addr = offset + (instr * 2) + row_offset;
 
             low_word  = (uint16_t)buffer[buffer_index++] << 8;
             low_word |= (uint16_t)buffer[buffer_index++];
 
-            __builtin_tblwtl((offset + (instr * 2)), low_word);
-            __builtin_tblwth((offset + (instr * 2)), dummy_data);
+            __builtin_tblwtl(addr, low_word);
+            __builtin_tblwth(addr, dummy_data);
         }
         __builtin_disi(5);
         __builtin_write_NVM();
