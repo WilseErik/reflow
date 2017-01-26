@@ -100,11 +100,13 @@ int main(void)
         //
         // Start temp reading
         //
+#endif
         else if (status_check(STATUS_START_TEMP_READING_FLAG))
         {
             status_clear(STATUS_START_TEMP_READING_FLAG);
             max6675_start_temp_reading();
         }
+#if 0
         else if (status_check(STATUS_UPDATE_TARGET_TEMP_FLAG))
         {
             status_clear(STATUS_UPDATE_TARGET_TEMP_FLAG);
@@ -122,19 +124,90 @@ int main(void)
         {
             if (!lcd_is_busy())
             {
+                static char upper_line[LCD_LINE_LEN];
+                static char lower_line[LCD_LINE_LEN];
+                uint16_t temp;
+                uint8_t temp_decimals;
+                uint16_t char_nbr;
+
+                temp = max6675_get_current_temp();
+
+                switch (temp & 0x0003)
+                {
+                    case 0:
+                        temp_decimals = 0;
+                        break;
+                    case 1:
+                        temp_decimals = 25;
+                        break;
+                    case 2:
+                        temp_decimals = 50;
+                        break;
+                    case 3:
+                        temp_decimals = 75;
+                        break;
+                }
+
+                temp = temp >> 2;
+                
                 status_clear(STATUS_LCD_REFRESH_FLAG);
-                lcd_refresh();
+                sprintf(upper_line, "T = %03u.%02u C ", temp, temp_decimals);
+                upper_line[13] = ' ';
+
+                for (char_nbr = 0; char_nbr != LCD_LINE_LEN; ++char_nbr)
+                {
+                    lower_line[char_nbr] = ' ';
+                }
+
+                lcd_set_text(upper_line, lower_line);
             }
         }
+#endif
         //
         // Log temp over UART
         //
         else if (status_check(STATUS_UART_LOG_TEMP_FLAG))
         {
+            char print[32];
+            uint16_t temp;
+            uint8_t temp_decimals;
+            static bool not_first_time;
+
             status_clear(STATUS_UART_LOG_TEMP_FLAG);
-            // Write current temp over UART
+
+            if (status_check(STATUS_REFLOW_PROGRAM_ACTIVE))
+            {
+                temp = max6675_get_current_temp();
+
+                switch (temp & 0x0003)
+                {
+                    case 0:
+                        temp_decimals = 0;
+                        break;
+                    case 1:
+                        temp_decimals = 25;
+                        break;
+                    case 2:
+                        temp_decimals = 50;
+                        break;
+                    case 3:
+                        temp_decimals = 75;
+                        break;
+                }
+
+                temp = temp >> 2;
+
+                if (!not_first_time)
+                {
+                    not_first_time = true;
+                    uart_write_string("\n\rtemperature;time\r\n");
+                }
+
+                sprintf(print, "temp = %03u.%02u; time = %u\r\n",
+                        temp, temp_decimals, timers_get_reflow_time());
+                uart_write_string(print);
+            }
         }
-#endif
         //
         // Handle UART receive buffer
         //
@@ -150,6 +223,9 @@ int main(void)
         else if (status_check(STATUS_START_BUTTON_PUSHED_FLAG))
         {
             status_clear(STATUS_START_BUTTON_PUSHED_FLAG);
+            timers_reset_reflow_time();
+            timers_activate_heater_control();
+            status_set(STATUS_REFLOW_PROGRAM_ACTIVE, true);
             buttons_start_pushed();
         }
 #if 0
