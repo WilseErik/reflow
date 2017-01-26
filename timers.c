@@ -50,8 +50,8 @@ static uint16_t HEATER_PWM_INTERVAL_20MS     = 50;
 // =============================================================================
 // Private variables
 // =============================================================================
-static volatile uint16_t prescaler_10ms = 0;
 static volatile uint16_t prescaler_20ms = 0;
+static volatile uint16_t prescaler_100ms = 0;
 static volatile uint16_t prescaler_250ms = 0;
 static volatile uint16_t prescaler_1000ms = 0;
 
@@ -198,14 +198,6 @@ void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void)
 
     buttons_run_debounce_logic();
     
-    if (10 == ++prescaler_10ms)
-    {
-        prescaler_10ms = 0;
-
-        status_set(STATUS_START_TEMP_READING_FLAG, true);
-        status_set(STATUS_RUN_PID_FLAG, true);
-    }
-
     if (20 == ++prescaler_20ms)
     {
         prescaler_20ms = 0;
@@ -231,12 +223,29 @@ void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void)
         ++heater_timer_20ms;
     }
 
+    if (100 == ++prescaler_100ms)
+    {
+        prescaler_100ms = 0;
+
+        status_set(STATUS_RUN_PID_FLAG, true);
+    }
+
     if (250 == ++prescaler_250ms)
     {
+        static uint16_t start_delay;
+
         prescaler_250ms = 0;
 
+        if (4 == start_delay)
+        {
+            status_set(STATUS_START_TEMP_READING_FLAG, true);
+        }
+        else
+        {
+            ++start_delay;
+        }
+
         status_set(STATUS_LCD_REFRESH_FLAG, true);
-        status_set(STATUS_UART_LOG_TEMP_FLAG, true);
     }
 
     if (1000 == ++prescaler_1000ms)
@@ -244,6 +253,7 @@ void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void)
         prescaler_1000ms = 0;
 
         ++reflow_time;
+        status_set(STATUS_UART_LOG_TEMP_FLAG, true);
         status_set(STATUS_UPDATE_TARGET_TEMP_FLAG, true);
     }
 }
