@@ -40,6 +40,7 @@ typedef enum
 
 typedef enum
 {
+    CRIT_ERR_NO_ERROR = 0,
     CRIT_ERR_LOOSE_THERMOCOUPLE,
     CRIT_ERR_INVALID_TEMP_READING,
     CRIT_ERR_OVERTEMP,
