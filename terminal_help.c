@@ -55,12 +55,16 @@ void terminal_help(char* in)
     {
         uart_write_string("\tSets the Kd constant in the PID regulator.\n\r\tParameter: <Value in the range [-65535.0, 65535.0]>\n\r\t\n\r");
     }
+    else if (NULL != strstr(in, "set heat pwm"))
+    {
+        uart_write_string("\tActivates the heater PWM and sets the pwm value.\n\r\tParameter: <Duty in range [0, 50]>\n\r\t\n\r");
+    }
     else
     {
         uart_write_string("\tType \"help <command>\" for more info\n\r");
         uart_write_string("\tAvailible commands:\n\r");
         uart_write_string("\t------------------------------------\n\r");
-        uart_write_string("\tget flash\n\r\tget kd\n\r\tget ki\n\r\tget kp\n\r\thello\n\r\tset flash\n\r\tset heater\n\r\tset kd\n\r\tset ki\n\r\tset kp\n\r\tset servo pos\n\r\ttest temp\n\r\t");
+        uart_write_string("\tget flash\n\r\tget kd\n\r\tget ki\n\r\tget kp\n\r\thello\n\r\tset flash\n\r\tset heat pwm\n\r\tset heater\n\r\tset kd\n\r\tset ki\n\r\tset kp\n\r\tset servo pos\n\r\ttest temp\n\r\t");
         uart_write_string("\n\r");
     }
 }
