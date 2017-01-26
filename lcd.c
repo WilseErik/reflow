@@ -215,8 +215,7 @@ void lcd_set_text(char first_line[LCD_LINE_LEN],
         queue_instr_write_data_to_ram(second_line[i]);
     }
     
-
-    
+    run_next_in_queue();
 }
 
 
