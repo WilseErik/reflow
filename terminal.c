@@ -17,6 +17,7 @@
 #include "servo.h"
 #include "flash.h"
 #include "control.h"
+#include "timers.h"
 
 // =============================================================================
 // Private type definitions
@@ -121,6 +122,12 @@ static const char SET_PID_KI[]      = "set ki";
  */
 static const char SET_PID_KD[]      = "set kd";
 
+/*§
+ Activates the heater PWM and sets the pwm value.
+ Parameter: <Duty in range [0, 50]>
+ */
+static const char SET_HEAT_PWM[]  = "set heat pwm";
+
 // =============================================================================
 // Private variables
 // =============================================================================
@@ -161,6 +168,8 @@ static void set_flash(void);
 static void set_pid_kp(void);
 static void set_pid_ki(void);
 static void set_pid_kd(void);
+
+static void set_heat_pwm(void);
 
 // =============================================================================
 // Public function definitions
@@ -250,6 +259,10 @@ static void execute_command(void)
         else if (NULL != strstr(cmd_buffer, SET_PID_KD))
         {
             set_pid_kd();
+        }
+        else if (NULL != strstr(cmd_buffer, SET_HEAT_PWM))
+        {
+            set_heat_pwm();
         }
         else
         {
@@ -584,5 +597,44 @@ static void set_pid_kd(void)
         flash_init_write_buffer();
         flash_write_word_to_buffer(FLASH_INDEX_KD, (uint16_t)kd);
         flash_write_buffer_to_flash();
+    }
+}
+
+static void set_heat_pwm(void)
+{
+    uint8_t * p;
+    char arg[5] = {0};
+
+    p = (uint8_t*)strstr(cmd_buffer, SET_HEAT_PWM);
+    p += strlen(SET_HEAT_PWM);
+    p += 1;     // +1 for space
+
+    if (!isdigit(*p))
+    {
+        arg_error = true;
+    }
+    else
+    {
+        uint8_t i = 0;
+        uint16_t pwm;
+
+        while ((i != 5) && isdigit(*p))
+        {
+            arg[i++] = *(p++);
+        }
+
+        arg[i] = NULL;
+
+        pwm = (uint16_t)atoi(arg);
+
+        if ((pwm >= 0) && (pwm <= 50))
+        {
+            timers_activate_heater_control();
+            timers_set_heater_duty(pwm);
+        }
+        else
+        {
+            arg_error = true;
+        }
     }
 }
