@@ -25,15 +25,15 @@ typedef enum
     READ_STATE_READING_IC_2,
 } max6675_read_state_t;
 
-#define FILTER_BUFFER_SIZE 20
+#define FILTER_BUFFER_SIZE 16
 typedef struct
 {
-    uint16_t latest;
-    uint16_t oldest;
-    uint16_t size;
-    uint32_t sum;
-    uint16_t mean;
-    uint16_t buffer[FILTER_BUFFER_SIZE];
+    volatile uint16_t latest;
+    volatile uint16_t oldest;
+    volatile uint16_t size;
+    volatile uint32_t sum;
+    volatile uint16_t mean;
+    volatile uint16_t buffer[FILTER_BUFFER_SIZE];
 } filter_buffer_t;
 
 // =============================================================================
@@ -44,9 +44,11 @@ typedef struct
 // Private constants
 // =============================================================================
 
-static const uint16_t MAX6675_ERROR_MASK = 0x00060;
+static const uint16_t MAX6675_ERROR_MASK = 0x0004;
 static const uint16_t MAX_TEMP_DIFF_BETWEEN_SENSORS = 100;
 static const uint16_t MAX_TEMPERATURE = 300;
+
+#define USE_ONE_IC (true)
 
 
 // =============================================================================
@@ -180,7 +182,7 @@ bool max6675_first_reading_done(void)
 uint16_t max6675_read_blocking(void)
 {
     uint16_t ret_val = 0x0000;
-
+    
     IEC0bits.SPI1IE = 0;
 
     MAX6675_1_CS_ON;
@@ -188,13 +190,14 @@ uint16_t max6675_read_blocking(void)
 
     while (!SPI1STATbits.SPIRBF)
     {
-        DEBUG_2_LED_ON;
+        DEBUG_3_LED_ON;
     }
-    DEBUG_2_LED_OFF;
+    DEBUG_3_LED_OFF;
 
     ret_val = SPI1BUF;
     MAX6675_1_CS_OFF;
-    
+
+    IFS0bits.SPI1IF = 0;
     IEC0bits.SPI1IE = 1;
 
     return ret_val;
@@ -231,6 +234,8 @@ static void add_reading(uint16_t temp)
         filter_buffer.sum = temp;
         filter_buffer.mean = temp;
         filter_buffer.size = 1;
+        filter_buffer.latest = 0;
+        filter_buffer.oldest = 0;
     }
     else
     {
@@ -245,23 +250,32 @@ static void add_reading(uint16_t temp)
 
     if (filter_buffer.mean > MAX_TEMPERATURE * 4)
     {
-        status_set(CRIT_ERR_OVERTEMP, true);
+        status_set(STATUS_CRITICAL_ERROR_FLAG, CRIT_ERR_OVERTEMP);
     }
 }
 
 void __attribute__((interrupt, no_auto_psv)) _SPI1Interrupt(void)
 {
     bool parse_read_values = false;
-    DEBUG_1_LED_TOGGLE;
+
+    IFS0bits.SPI1IF = 0;
 
     switch (read_state)
     {
         case READ_STATE_READING_IC_1:
             MAX6675_1_CS_OFF;
+
+#if !USE_ONE_IC
             MAX6675_2_CS_ON;
             ic1_reading = SPI1BUF;
             read_state = READ_STATE_READING_IC_2;
             SPI1BUF = 0x0000;   // load with dummy value to start reading
+#else
+            ic1_reading = SPI1BUF;
+            ic2_reading = ic1_reading;
+            read_state = READ_STATE_IDLE;
+            parse_read_values = true;
+#endif
             break;
 
         case READ_STATE_READING_IC_2:
@@ -288,13 +302,13 @@ void __attribute__((interrupt, no_auto_psv)) _SPI1Interrupt(void)
 
         if (ic1_reading & MAX6675_ERROR_MASK)
         {
-            status_set(CRIT_ERR_LOOSE_THERMOCOUPLE, true);
+            status_set(STATUS_CRITICAL_ERROR_FLAG, CRIT_ERR_LOOSE_THERMOCOUPLE);
             return;
         }
 
         if (ic2_reading & MAX6675_ERROR_MASK)
         {
-            status_set(CRIT_ERR_LOOSE_THERMOCOUPLE, true);
+            status_set(STATUS_CRITICAL_ERROR_FLAG, CRIT_ERR_LOOSE_THERMOCOUPLE);
             return;
         }
 
@@ -302,7 +316,8 @@ void __attribute__((interrupt, no_auto_psv)) _SPI1Interrupt(void)
         {
             if (first_temp - second_temp > MAX_TEMP_DIFF_BETWEEN_SENSORS)
             {
-                status_set(CRIT_ERR_INVALID_TEMP_READING, true);
+                status_set(STATUS_CRITICAL_ERROR_FLAG,
+                        CRIT_ERR_INVALID_TEMP_READING);
                 return;
             }
         }
@@ -310,11 +325,12 @@ void __attribute__((interrupt, no_auto_psv)) _SPI1Interrupt(void)
         {
             if (second_temp - first_temp > MAX_TEMP_DIFF_BETWEEN_SENSORS)
             {
-                status_set(CRIT_ERR_INVALID_TEMP_READING, true);
+                status_set(STATUS_CRITICAL_ERROR_FLAG,
+                        CRIT_ERR_INVALID_TEMP_READING);
                 return;
             }
         }
-
+        
         add_reading((first_temp + second_temp) / 2);
     }
 }
