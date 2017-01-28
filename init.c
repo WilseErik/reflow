@@ -15,6 +15,7 @@
 #include "fixed_point.h"
 #include "flash.h"
 #include "led.h"
+#include "temp_curve.h"
 
 // =============================================================================
 // Private type definitions
@@ -69,9 +70,22 @@ void init(void)
     control_set_kd((q16_16_t)flash_read_dword(FLASH_INDEX_KD));
     control_start();
 
-    led_init(flash_read_word(FLASH_INDEX_LEAD_FREE_SOAK_START_SEC),
-             flash_read_word(FLASH_INDEX_LEAD_FREE_REFLOW_START_SEC),
-             flash_read_word(FLASH_INDEX_LEAD_FREE_COOL_START_SEC));
+    if (LEAD_SWITCH_PIN)
+    {
+        led_init(flash_read_word(FLASH_INDEX_LEAD_SOAK_START_SEC),
+                 flash_read_word(FLASH_INDEX_LEAD_REFLOW_START_SEC),
+                 flash_read_word(FLASH_INDEX_LEAD_COOL_START_SEC));
+        
+        temp_curve_init(TEMP_CURVE_LEAD);
+    }
+    else
+    {
+        led_init(flash_read_word(FLASH_INDEX_LEAD_FREE_SOAK_START_SEC),
+                 flash_read_word(FLASH_INDEX_LEAD_FREE_REFLOW_START_SEC),
+                 flash_read_word(FLASH_INDEX_LEAD_FREE_COOL_START_SEC));
+
+        temp_curve_init(TEMP_CURVE_LEAD_FREE);
+    }
 }
 
 // =============================================================================
