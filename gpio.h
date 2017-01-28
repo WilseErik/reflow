@@ -34,15 +34,23 @@ extern "C" {
 //
 #define PREHEAT_LED_PIN             LATGbits.LATG6
 #define PREHEAT_LED_DIR             TRISGbits.TRISG6
+#define PREHEAT_LED_ON              PREHEAT_LED_PIN = 1
+#define PREHEAT_LED_OFF             PREHEAT_LED_PIN = 0
 
 #define SOAK_LED_PIN                LATGbits.LATG7
 #define SOAK_LED_DIR                TRISGbits.TRISG7
+#define SOAK_LED_ON                 SOAK_LED_PIN = 1
+#define SOAK_LED_OFF                SOAK_LED_PIN = 0
 
 #define REFLOW_LED_PIN              LATGbits.LATG8
 #define REFLOW_LED_DIR              TRISGbits.TRISG9
+#define REFLOW_LED_ON               REFLOW_LED_PIN = 1
+#define REFLOW_LED_OFF              REFLOW_LED_PIN = 0
 
 #define COOL_LED_PIN                LATGbits.LATG9
 #define COOL_LED_DIR                TRISGbits.TRISG9
+#define COOL_LED_ON                 COOL_LED_PIN = 1
+#define COOL_LED_OFF                COOL_LED_PIN = 0
 
 #define DEBUG_1_LED_PIN             LATBbits.LATB12
 #define DEBUG_1_LED_DIR             TRISBbits.TRISB12
