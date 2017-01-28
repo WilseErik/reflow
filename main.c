@@ -19,6 +19,7 @@
 #include "terminal.h"
 #include "control.h"
 #include "temp_curve.h"
+#include "led.h"
 
 // =============================================================================
 // Private type definitions
