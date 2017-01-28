@@ -106,17 +106,24 @@ int main(void)
             status_clear(STATUS_START_TEMP_READING_FLAG);
             max6675_start_temp_reading();
         }
-#if 0
-        else if (status_check(STATUS_UPDATE_TARGET_TEMP_FLAG))
+        else if (status_check(STATUS_REFLOW_TIME_UPDATED_FLAG))
         {
-            status_clear(STATUS_UPDATE_TARGET_TEMP_FLAG);
+            uint16_t time;
+            bool prog_active;
 
-            if (status_check(STATUS_REFLOW_PROGRAM_ACTIVE))
+            status_clear(STATUS_REFLOW_TIME_UPDATED_FLAG);
+
+            time = timers_get_reflow_time();
+            
+            prog_active = status_check(STATUS_REFLOW_PROGRAM_ACTIVE);
+            led_update(time, prog_active);
+
+            if (prog_active)
             {
-                control_set_target_value(
-                        temp_curve_eval(timers_get_reflow_time()));
+                control_set_target_value(temp_curve_eval(time));
             }
         }
+#if 1
         //
         // Refresh LCD screen
         //

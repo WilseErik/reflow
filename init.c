@@ -14,6 +14,7 @@
 #include "control.h"
 #include "fixed_point.h"
 #include "flash.h"
+#include "led.h"
 
 // =============================================================================
 // Private type definitions
@@ -67,6 +68,10 @@ void init(void)
     control_set_ki((q16_16_t)flash_read_dword(FLASH_INDEX_KI));
     control_set_kd((q16_16_t)flash_read_dword(FLASH_INDEX_KD));
     control_start();
+
+    led_init(flash_read_word(FLASH_INDEX_LEAD_FREE_SOAK_START_SEC),
+             flash_read_word(FLASH_INDEX_LEAD_FREE_REFLOW_START_SEC),
+             flash_read_word(FLASH_INDEX_LEAD_FREE_COOL_START_SEC));
 }
 
 // =============================================================================

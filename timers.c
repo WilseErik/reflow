@@ -254,6 +254,6 @@ void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void)
 
         ++reflow_time;
         status_set(STATUS_UART_LOG_TEMP_FLAG, true);
-        status_set(STATUS_UPDATE_TARGET_TEMP_FLAG, true);
+        status_set(STATUS_REFLOW_TIME_UPDATED_FLAG, true);
     }
 }
