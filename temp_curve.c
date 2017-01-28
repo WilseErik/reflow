@@ -91,7 +91,7 @@ void temp_curve_init(temp_curve_variant_t variant)
     for (i = 0; i != nbr_of_calib_points; ++i)
     {
         lookup_table[i].temp = (q16_16_t)flash_read_word(flash_index);
-        lookup_table[i].time = flash_read_word(flash_index + sizeof(q16_16_t));
+        lookup_table[i].time = flash_read_dword(flash_index + sizeof(q16_16_t));
 
         flash_index += sizeof(temp_curve_calib_point_t);
     }
