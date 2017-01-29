@@ -36,16 +36,6 @@ void buttons_init(void);
  */
 void buttons_run_debounce_logic(void);
 
-/**
- * @brief The code to run whenever the start button has been pushed.
- */
-void buttons_start_pushed(void);
-
-/**
- * @brief The code to run whenever the stop button has been pushed.
- */
-void buttons_stop_pushed(void);
-
 #ifdef	__cplusplus
 }
 #endif

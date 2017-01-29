@@ -36,9 +36,11 @@ static const uint16_t RELEASED_FILTER_VAL = 0x8000;
 
 static volatile uint16_t start_button_filter = 0x0000;
 static volatile uint16_t stop_button_filter = 0x0000;
+static volatile uint16_t lead_switch_filter = 0x0000;
 
 static volatile button_state_t start_button_state;
 static volatile button_state_t stop_button_state;
+static volatile button_state_t lead_switch_state;
 
 // =============================================================================
 // Private function declarations
@@ -50,11 +52,36 @@ static volatile button_state_t stop_button_state;
 
 void buttons_init(void)
 {
-    start_button_filter = 0x0000;
-    stop_button_filter = 0x0000;
-
     start_button_state = START_BUTTON_PIN;
     stop_button_state  = STOP_BUTTON_PIN;
+    lead_switch_state  = LEAD_SWITCH_PIN;
+
+    if (start_button_state)
+    {
+        start_button_filter = 0xFFFF;
+    }
+    else
+    {
+        start_button_filter = 0x0000;
+    }
+
+    if (stop_button_state)
+    {
+        stop_button_filter = 0xFFFF;
+    }
+    else
+    {
+        stop_button_filter = 0x0000;
+    }
+
+    if (lead_switch_state)
+    {
+        lead_switch_filter = 0xFFFF;
+    }
+    else
+    {
+        lead_switch_filter = 0x0000;
+    }
 }
 
 void buttons_run_debounce_logic(void)
@@ -122,16 +149,41 @@ void buttons_run_debounce_logic(void)
             }
             break;
     }
-}
 
-void buttons_start_pushed(void)
-{
-    ;
-}
+    //
+    // Lead switch
+    //
+    lead_switch_filter = lead_switch_filter << 1;
 
-void buttons_stop_pushed(void)
-{
-    ;
+    if (LEAD_SWITCH_PIN)
+    {
+        lead_switch_filter |= 0x0001;
+    }
+    else
+    {
+        lead_switch_filter &= ~0x0001;
+    }
+
+    switch (lead_switch_state)
+    {
+        case BUTTON_IS_RELEASED:
+            if (RELEASED_FILTER_VAL == lead_switch_filter)
+            {
+                status_set(STATUS_SWITCH_TO_LEAD_FLAG, true);
+                status_clear(STATUS_SWITCH_TO_LEAD_FREE_FLAG);
+                lead_switch_state = BUTTON_IS_PRESSED;
+            }
+            break;
+
+        case BUTTON_IS_PRESSED:
+            if (PRESSED_FILTER_VAL == lead_switch_filter)
+            {
+                status_set(STATUS_SWITCH_TO_LEAD_FREE_FLAG, true);
+                status_clear(STATUS_SWITCH_TO_LEAD_FLAG);
+                lead_switch_state = BUTTON_IS_RELEASED;
+            }
+            break;
+    }
 }
 
 // =============================================================================
