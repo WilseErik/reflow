@@ -59,6 +59,8 @@ void init(void)
     uart_init();
     print_start_message(reset_reason);
 
+    flash_init();
+    
     buttons_init();
     max6675_init();
     timers_start_msec_timer();

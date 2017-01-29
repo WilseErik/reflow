@@ -78,6 +78,11 @@ typedef enum
 // =============================================================================
 
 /**
+ * @brief Initializes the flash by setting any missing values to their default.
+ */
+void flash_init(void);
+
+/**
  * @brief Reads one byte from the flash memory.
  * @param index     Index to read from.
  * @return the read value.

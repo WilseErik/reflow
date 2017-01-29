@@ -108,6 +108,65 @@ static void erase_flash_data(void);
 // Public function definitions
 // =============================================================================
 
+void flash_init(void)
+{
+    if (0 == flash_read_word(FLASH_INDEX_LEAD_FREE_TEMP_CURVE_SIZE))
+    {
+        uint16_t index;
+        uint16_t i;
+        uint16_t temp[] = {25, 100, 150, 170, 200, 240, 250, 250, 75};
+        uint16_t time[] = {0 , 30 , 60,  90 , 120, 150, 160, 190, 240};
+        uint16_t nbr_of_data_point = sizeof(time) / sizeof(uint16_t);
+        
+        flash_init_write_buffer();
+
+        flash_write_word_to_buffer(FLASH_INDEX_LEAD_FREE_TEMP_CURVE_SIZE,
+                                   nbr_of_data_point);
+
+        flash_write_word_to_buffer(FLASH_INDEX_LEAD_FREE_SOAK_START_SEC, 60);
+        flash_write_word_to_buffer(FLASH_INDEX_LEAD_FREE_REFLOW_START_SEC, 140);
+        flash_write_word_to_buffer(FLASH_INDEX_LEAD_FREE_COOL_START_SEC, 200);
+
+        index = FLASH_INDEX_LEAD_FREE_TEMP_CURVE_START;
+
+        for (i = 0; i != nbr_of_data_point; ++i)
+        {
+            flash_write_dword_to_buffer(index, int_to_q16_16(temp[i]));
+            index += 4;
+            flash_write_word_to_buffer(time[i], 0);
+            index += 2;
+        }
+    }
+
+    if (0 == flash_read_word(FLASH_INDEX_LEAD_TEMP_CURVE_SIZE))
+    {
+        uint16_t index;
+        uint16_t i;
+        uint16_t temp[] = {25, 150, 180, 220, 220, 160, 75};
+        uint16_t time[] = {0 , 90 , 180, 210, 240, 300, 370};
+        uint16_t nbr_of_data_point = sizeof(time) / sizeof(uint16_t);
+
+        flash_init_write_buffer();
+
+        flash_write_word_to_buffer(FLASH_INDEX_LEAD_TEMP_CURVE_SIZE,
+                                   nbr_of_data_point);
+
+        flash_write_word_to_buffer(FLASH_INDEX_LEAD_SOAK_START_SEC, 90);
+        flash_write_word_to_buffer(FLASH_INDEX_LEAD_REFLOW_START_SEC, 190);
+        flash_write_word_to_buffer(FLASH_INDEX_LEAD_COOL_START_SEC, 270);
+
+        index = FLASH_INDEX_LEAD_TEMP_CURVE_START;
+
+        for (i = 0; i != nbr_of_data_point; ++i)
+        {
+            flash_write_dword_to_buffer(index, int_to_q16_16(temp[i]));
+            index += 4;
+            flash_write_word_to_buffer(time[i], 0);
+            index += 2;
+        }
+    }
+}
+
 uint8_t flash_read_byte(flash_index_t index)
 {
     uint16_t data;
