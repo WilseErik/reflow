@@ -154,6 +154,11 @@ q16_16_t temp_curve_eval(uint16_t time)
     return ret_val;
 }
 
+uint16_t temp_curve_get_time_of_last_val(void)
+{
+    return lookup_table[nbr_of_calib_points - 1].time;
+}
+
 // =============================================================================
 // Private function definitions
 // =============================================================================

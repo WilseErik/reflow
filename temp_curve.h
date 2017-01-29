@@ -55,6 +55,12 @@ void temp_curve_init(temp_curve_variant_t variant);
  */
 q16_16_t temp_curve_eval(uint16_t time);
 
+/**
+ * @brief Gets the time of the last data point in the temperature curve.
+ * @return Time of last data point in seconds.
+ */
+uint16_t temp_curve_get_time_of_last_val(void);
+
 #ifdef	__cplusplus
 }
 #endif
