@@ -21,7 +21,7 @@
 // Private constants
 // =============================================================================
 
-#define INTEGRAL_SCALE_FACTOR           0.01
+#define INTEGRAL_SCALE_FACTOR           0.001
 
 #define DERIVATE_FILTER_OLD_VAL_FACTOR  0.5
 #define DERIVATE_FILTER_NEW_VAL_FACTOR  (1.0 - DERIVATE_FILTER_OLD_VAL_FACTOR)
