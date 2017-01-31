@@ -18,6 +18,7 @@
 #include "flash.h"
 #include "control.h"
 #include "timers.h"
+#include "buttons.h"
 
 // =============================================================================
 // Private type definitions
@@ -98,6 +99,24 @@ static const char GET_PID_KD[]      = "get kd";
  Return: <scaling factor as positive float value>
  */
 static const char GET_PID_SERVO_FACTOR[] = "get pid servo factor";
+
+/*§
+ Gets the timestamp in [s] for when the soak period starts.
+ This is done for the profile selected by the reflow profile switch.
+ */
+static const char GET_START_OF_SOAK[] = "get start of soak";
+
+/*§
+ Gets the timestamp in [s] for when the reflow period starts.
+ This is done for the profile selected by the reflow profile switch.
+ */
+static const char GET_START_OF_REFLOW[] = "get start of reflow";
+
+/*§
+ Gets the timestamp in [s] for when the cooling period starts.
+ This is done for the profile selected by the reflow profile switch.
+ */
+static const char GET_START_OF_COOL[] = "get start of cool";
 
 /*§
  Sets the heater on or off.
@@ -182,6 +201,10 @@ static void get_pid_ki(void);
 static void get_pid_kd(void);
 static void get_pid_servo_factor(void);
 
+static void get_start_of_soak(void);
+static void get_start_of_reflow(void);
+static void get_start_of_cool(void);
+
 static void set_heater(void);
 static void set_servo_pos(void);
 static void set_flash(void);
@@ -254,6 +277,18 @@ static void execute_command(void)
         else if (NULL != strstr(cmd_buffer, GET_PID_SERVO_FACTOR))
         {
             get_pid_servo_factor();
+        }
+        else if (NULL != strstr(cmd_buffer, GET_START_OF_SOAK))
+        {
+            get_start_of_soak();
+        }
+        else if (NULL != strstr(cmd_buffer, GET_START_OF_REFLOW))
+        {
+            get_start_of_reflow();
+        }
+        else if (NULL != strstr(cmd_buffer, GET_START_OF_COOL))
+        {
+            get_start_of_cool();
         }
         else
         {
@@ -459,6 +494,66 @@ static void get_pid_servo_factor(void)
     sprintf(ans, "%lf%s", q16_16_to_double(
             (q16_16_t)flash_read_dword(FLASH_INDEX_SERVO_FACTOR)),
             NEWLINE);
+    uart_write_string(ans);
+}
+
+static void get_start_of_soak(void)
+{
+    char ans[32];
+
+    if (buttons_is_profile_switch_lead())
+    {
+        sprintf(ans, "%us%s",
+            flash_read_word(FLASH_INDEX_LEAD_SOAK_START_SEC),
+            NEWLINE);
+    }
+    else
+    {
+        sprintf(ans, "%us%s",
+            flash_read_word(FLASH_INDEX_LEAD_FREE_SOAK_START_SEC),
+            NEWLINE);
+    }
+
+    uart_write_string(ans);
+}
+
+static void get_start_of_reflow(void)
+{
+    char ans[32];
+
+    if (buttons_is_profile_switch_lead())
+    {
+        sprintf(ans, "%us%s",
+            flash_read_word(FLASH_INDEX_LEAD_REFLOW_START_SEC),
+            NEWLINE);
+    }
+    else
+    {
+        sprintf(ans, "%us%s",
+            flash_read_word(FLASH_INDEX_LEAD_FREE_REFLOW_START_SEC),
+            NEWLINE);
+    }
+
+    uart_write_string(ans);
+}
+
+static void get_start_of_cool(void)
+{
+    char ans[32];
+
+    if (buttons_is_profile_switch_lead())
+    {
+        sprintf(ans, "%us%s",
+            flash_read_word(FLASH_INDEX_LEAD_COOL_START_SEC),
+            NEWLINE);
+    }
+    else
+    {
+        sprintf(ans, "%us%s",
+            flash_read_word(FLASH_INDEX_LEAD_FREE_COOL_START_SEC),
+            NEWLINE);
+    }
+
     uart_write_string(ans);
 }
 

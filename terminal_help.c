@@ -39,6 +39,18 @@ void terminal_help(char* in)
     {
         uart_write_string("\tGets the servo output scaling factor.\n\r\tReturn: <scaling factor as positive float value>\n\r\t\n\r");
     }
+    else if (NULL != strstr(in, "get start of soak"))
+    {
+        uart_write_string("\tGets the timestamp in [s] for when the soak period starts.\n\r\tThis is done for the profile selected by the reflow profile switch.\n\r\t\n\r");
+    }
+    else if (NULL != strstr(in, "get start of reflow"))
+    {
+        uart_write_string("\tGets the timestamp in [s] for when the reflow period starts.\n\r\tThis is done for the profile selected by the reflow profile switch.\n\r\t\n\r");
+    }
+    else if (NULL != strstr(in, "get start of cool"))
+    {
+        uart_write_string("\tGets the timestamp in [s] for when the cooling period starts.\n\r\tThis is done for the profile selected by the reflow profile switch.\n\r\t\n\r");
+    }
     else if (NULL != strstr(in, "set heater"))
     {
         uart_write_string("\tSets the heater on or off.\n\r\tParameter: <'on' or 'off'>\n\r\t\n\r");
@@ -76,7 +88,7 @@ void terminal_help(char* in)
         uart_write_string("\tType \"help <command>\" for more info\n\r");
         uart_write_string("\tAvailible commands:\n\r");
         uart_write_string("\t------------------------------------\n\r");
-        uart_write_string("\tget flash\n\r\tget kd\n\r\tget ki\n\r\tget kp\n\r\tget pid servo factor\n\r\thello\n\r\tset flash\n\r\tset heat pwm\n\r\tset heater\n\r\tset kd\n\r\tset ki\n\r\tset kp\n\r\tset pid servo factor\n\r\tset servo pos\n\r\ttemp curve eval \n\r\ttest temp\n\r\t");
+        uart_write_string("\tget flash\n\r\tget kd\n\r\tget ki\n\r\tget kp\n\r\tget pid servo factor\n\r\tget start of cool\n\r\tget start of reflow\n\r\tget start of soak\n\r\thello\n\r\tset flash\n\r\tset heat pwm\n\r\tset heater\n\r\tset kd\n\r\tset ki\n\r\tset kp\n\r\tset pid servo factor\n\r\tset servo pos\n\r\ttemp curve eval \n\r\ttest temp\n\r\t");
         uart_write_string("\n\r");
     }
 }
