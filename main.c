@@ -228,7 +228,7 @@ static inline void handle_pid_event(void)
     if (status_check(STATUS_REFLOW_PROGRAM_ACTIVE))
     {
         q16_16_t temp = int_to_q16_16(max6675_get_current_temp());
-        q16_16_t y = control_update_pid(temp);
+        q16_16_t y = control_update_pid(temp >> 2);
 
         if (y >= 0)
         {
