@@ -34,6 +34,7 @@
 #include <stdint.h>
 
 #include <xc.h>
+#include "fixed_point.h"
 
 // =============================================================================
 // Private type definitions
@@ -167,6 +168,14 @@ void flash_init(void)
             index += 2;
         }
 
+        flash_write_buffer_to_flash();
+    }
+
+    if (0 == flash_read_dword(FLASH_INDEX_SERVO_FACTOR))
+    {
+        flash_init_write_buffer();
+        flash_write_dword_to_buffer(FLASH_INDEX_SERVO_FACTOR,
+                                   (uint32_t)DOUBLE_TO_Q16_16(-1200.0/50.0));
         flash_write_buffer_to_flash();
     }
 }
