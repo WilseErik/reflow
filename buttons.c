@@ -186,6 +186,11 @@ void buttons_run_debounce_logic(void)
     }
 }
 
+bool buttons_is_profile_switch_lead(void)
+{
+    return lead_switch_state == BUTTON_IS_PRESSED;
+}
+
 // =============================================================================
 // Private function definitions
 // =============================================================================

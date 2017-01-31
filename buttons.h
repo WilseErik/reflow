@@ -8,7 +8,8 @@ extern "C" {
 // =============================================================================
 // Include statements
 // =============================================================================
-
+#include <stdbool.h>
+    
 // =============================================================================
 // Public type definitions
 // =============================================================================
@@ -35,6 +36,13 @@ void buttons_init(void);
  * @brief Runs the debunce logic.
  */
 void buttons_run_debounce_logic(void);
+
+/**
+ * @brief Checks if the reflow profile switch is in the 'Lead' position, not in
+ *        'Lead free'.
+ * @return true if in 'lead' position, false if in 'lead free' position.
+ */
+bool buttons_is_profile_switch_lead(void);
 
 #ifdef	__cplusplus
 }
