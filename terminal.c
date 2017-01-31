@@ -166,6 +166,27 @@ static const char SET_PID_SERVO_FACTOR[] = "set pid servo factor";
  */
 static const char SET_HEAT_PWM[]  = "set heat pwm";
 
+/*§
+ Sets the timestamp in [s] for when the soak period starts.
+ This is done for the profile selected by the reflow profile switch.
+ Parameter: <timestamp in seconds>
+ */
+static const char SET_START_OF_SOAK[] = "set start of soak";
+
+/*§
+ Sets the timestamp in [s] for when the reflow period starts.
+ This is done for the profile selected by the reflow profile switch.
+ Parameter: <timestamp in seconds>
+ */
+static const char SET_START_OF_REFLOW[] = "set start of reflow";
+
+/*§
+ Sets the timestamp in [s] for when the cool period starts.
+ This is done for the profile selected by the reflow profile switch.
+ Parameter: <timestamp in seconds>
+ */
+static const char SET_START_OF_COOL[] = "set start of cool";
+
 // =============================================================================
 // Private variables
 // =============================================================================
@@ -213,6 +234,10 @@ static void set_pid_kp(void);
 static void set_pid_ki(void);
 static void set_pid_kd(void);
 static void set_pid_servo_factor(void);
+
+static void set_start_of_soak(void);
+static void set_start_of_reflow(void);
+static void set_start_of_cool(void);
 
 static void set_heat_pwm(void);
 
@@ -328,6 +353,18 @@ static void execute_command(void)
         else if (NULL != strstr(cmd_buffer, SET_HEAT_PWM))
         {
             set_heat_pwm();
+        }
+        else if (NULL != strstr(cmd_buffer, SET_START_OF_SOAK))
+        {
+            set_start_of_soak();
+        }
+        else if (NULL != strstr(cmd_buffer, SET_START_OF_REFLOW))
+        {
+            set_start_of_reflow();
+        }
+        else if (NULL != strstr(cmd_buffer, SET_START_OF_COOL))
+        {
+            set_start_of_cool();
         }
         else
         {
@@ -841,5 +878,134 @@ static void set_heat_pwm(void)
         {
             arg_error = true;
         }
+    }
+}
+
+static void set_start_of_soak(void)
+{
+    uint8_t * p;
+    char arg[8] = {0};
+
+    p = (uint8_t*)strstr(cmd_buffer, SET_START_OF_SOAK);
+    p += strlen(SET_START_OF_SOAK);
+    p += 1;     // +1 for space
+
+    if (!isdigit(*p))
+    {
+        arg_error = true;
+    }
+    else
+    {
+        uint8_t i = 0;
+        uint16_t time;
+
+        while ((i != 7) && isdigit(*p))
+        {
+            arg[i++] = *(p++);
+        }
+
+        arg[i] = NULL;
+
+        time = (uint16_t)atoi(arg);
+
+        flash_init_write_buffer();
+        
+        if (buttons_is_profile_switch_lead())
+        {
+            flash_write_word_to_buffer(FLASH_INDEX_LEAD_SOAK_START_SEC, time);
+        }
+        else
+        {
+            flash_write_word_to_buffer(
+                    FLASH_INDEX_LEAD_FREE_SOAK_START_SEC, time);
+        }
+
+        flash_write_buffer_to_flash();
+    }
+}
+
+static void set_start_of_reflow(void)
+{
+    uint8_t * p;
+    char arg[8] = {0};
+
+    p = (uint8_t*)strstr(cmd_buffer, SET_START_OF_REFLOW);
+    p += strlen(SET_START_OF_REFLOW);
+    p += 1;     // +1 for space
+
+    if (!isdigit(*p))
+    {
+        arg_error = true;
+    }
+    else
+    {
+        uint8_t i = 0;
+        uint16_t time;
+
+        while ((i != 7) && isdigit(*p))
+        {
+            arg[i++] = *(p++);
+        }
+
+        arg[i] = NULL;
+
+        time = (uint16_t)atoi(arg);
+
+        flash_init_write_buffer();
+
+        if (buttons_is_profile_switch_lead())
+        {
+            flash_write_word_to_buffer(FLASH_INDEX_LEAD_REFLOW_START_SEC, time);
+        }
+        else
+        {
+            flash_write_word_to_buffer(
+                    FLASH_INDEX_LEAD_FREE_REFLOW_START_SEC, time);
+        }
+
+        flash_write_buffer_to_flash();
+    }
+}
+
+static void set_start_of_cool(void)
+{
+    uint8_t * p;
+    char arg[8] = {0};
+
+    p = (uint8_t*)strstr(cmd_buffer, SET_START_OF_COOL);
+    p += strlen(SET_START_OF_COOL);
+    p += 1;     // +1 for space
+
+    if (!isdigit(*p))
+    {
+        arg_error = true;
+    }
+    else
+    {
+        uint8_t i = 0;
+        uint16_t time;
+
+        while ((i != 7) && isdigit(*p))
+        {
+            arg[i++] = *(p++);
+        }
+
+        arg[i] = NULL;
+
+        time = (uint16_t)atoi(arg);
+
+        flash_init_write_buffer();
+
+        if (buttons_is_profile_switch_lead())
+        {
+            flash_write_word_to_buffer(FLASH_INDEX_LEAD_COOL_START_SEC, time);
+        }
+        else
+        {
+            flash_write_word_to_buffer(
+                    FLASH_INDEX_LEAD_FREE_COOL_START_SEC, time);
+        }
+
+        flash_write_buffer_to_flash();
     }
 }
