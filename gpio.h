@@ -43,7 +43,7 @@ extern "C" {
 #define SOAK_LED_OFF                SOAK_LED_PIN = 0
 
 #define REFLOW_LED_PIN              LATGbits.LATG8
-#define REFLOW_LED_DIR              TRISGbits.TRISG9
+#define REFLOW_LED_DIR              TRISGbits.TRISG8
 #define REFLOW_LED_ON               REFLOW_LED_PIN = 1
 #define REFLOW_LED_OFF              REFLOW_LED_PIN = 0
 
@@ -79,7 +79,7 @@ extern "C" {
 //
 // Buttons
 //
-#define START_BUTTON_PIN            PORTDbits.RD9
+#define START_BUTTON_PIN            PORTDbits.RD8
 #define START_BUTTON_DIR            TRISDbits.TRISD8
 
 #define STOP_BUTTON_PIN             PORTDbits.RD9
@@ -106,7 +106,7 @@ extern "C" {
 #define LCD_RW_PIN_READ             1
 #define LCD_RW_PIN_WRITE            0
 #define LCD_RW_PIN                  LATDbits.LATD6
-#define LCD_RW_DIR                  TRISDbits.TRISD9
+#define LCD_RW_DIR                  TRISDbits.TRISD6
 
 #define LCD_E_PIN                   LATDbits.LATD7
 #define LCD_E_DIR                   TRISDbits.TRISD7
