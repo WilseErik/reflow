@@ -74,13 +74,13 @@ void temp_curve_init(temp_curve_variant_t variant)
     {
         case TEMP_CURVE_LEAD_FREE:
             nbr_of_calib_points =
-                    flash_read_byte(FLASH_INDEX_LEAD_FREE_TEMP_CURVE_SIZE);
+                    flash_read_word(FLASH_INDEX_LEAD_FREE_TEMP_CURVE_SIZE);
             flash_index = FLASH_INDEX_LEAD_FREE_TEMP_CURVE_START;
             break;
 
         case TEMP_CURVE_LEAD:
             nbr_of_calib_points =
-                    flash_read_byte(FLASH_INDEX_LEAD_TEMP_CURVE_SIZE);
+                    flash_read_word(FLASH_INDEX_LEAD_TEMP_CURVE_SIZE);
             flash_index = FLASH_INDEX_LEAD_TEMP_CURVE_START;
             break;
 
