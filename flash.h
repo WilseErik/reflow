@@ -40,6 +40,7 @@ typedef enum
     FLASH_INDEX_KP          = 0x02,
     FLASH_INDEX_KI          = 0x06,
     FLASH_INDEX_KD          = 0x0A,
+    FLASH_INDEX_SERVO_FACTOR= 0x0E,
 
     //
     // Temperature curve
