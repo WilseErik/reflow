@@ -15,6 +15,10 @@ void terminal_help(char* in)
     {
         uart_write_string("\tReads one value from the first MAX6675 ic.\n\r\tReturns: <read value as 16 bits in hex format>\n\r\t\n\r");
     }
+    else if (NULL != strstr(in, "temp curve eval "))
+    {
+        uart_write_string("\tEvalues the temperature curve at one point in time.\n\r\tParameters: <seconds in to reflow program>\n\r\tReturns: <target temperature>\n\r\t\n\r");
+    }
     else if (NULL != strstr(in, "get flash"))
     {
         uart_write_string("\tGets one byte from the flash data memory.\n\r\tParameter: <index in hex format>\n\r\tReturns: <hex value of byte at specified index>\n\r\t\n\r");
@@ -72,7 +76,7 @@ void terminal_help(char* in)
         uart_write_string("\tType \"help <command>\" for more info\n\r");
         uart_write_string("\tAvailible commands:\n\r");
         uart_write_string("\t------------------------------------\n\r");
-        uart_write_string("\tget flash\n\r\tget kd\n\r\tget ki\n\r\tget kp\n\r\tget pid servo factor\n\r\thello\n\r\tset flash\n\r\tset heat pwm\n\r\tset heater\n\r\tset kd\n\r\tset ki\n\r\tset kp\n\r\tset pid servo factor\n\r\tset servo pos\n\r\ttest temp\n\r\t");
+        uart_write_string("\tget flash\n\r\tget kd\n\r\tget ki\n\r\tget kp\n\r\tget pid servo factor\n\r\thello\n\r\tset flash\n\r\tset heat pwm\n\r\tset heater\n\r\tset kd\n\r\tset ki\n\r\tset kp\n\r\tset pid servo factor\n\r\tset servo pos\n\r\ttemp curve eval \n\r\ttest temp\n\r\t");
         uart_write_string("\n\r");
     }
 }

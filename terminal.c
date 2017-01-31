@@ -62,6 +62,13 @@ static const char CMD_HELLO[]       = "hello";
 static const char CMD_TEST_TEMP[]   = "test temp";
 
 /*§
+ Evalues the temperature curve at one point in time.
+ Parameters: <seconds in to reflow program>
+ Returns: <target temperature>
+ */
+static const char CMD_TEMP_CURVE_EVAL[] = "temp curve eval ";
+
+/*§
  Gets one byte from the flash data memory.
  Parameter: <index in hex format>
  Returns: <hex value of byte at specified index>
@@ -166,6 +173,7 @@ static void execute_command(void);
 //
 static void cmd_hello(void);
 static void cmd_test_temp(void);
+static void cmd_temp_curve_eval(void);
 
 static void get_flash(void);
 
@@ -301,6 +309,10 @@ static void execute_command(void)
         {
             cmd_test_temp();
         }
+        else if (NULL != strstr(cmd_buffer, CMD_TEMP_CURVE_EVAL))
+        {
+            cmd_temp_curve_eval();
+        }
         else
         {
             syntax_error = true;
@@ -331,6 +343,42 @@ static void cmd_test_temp(void)
     uint16_t reading = max6675_read_blocking();
     sprintf(ans, "%04X%s", reading, NEWLINE);
     uart_write_string(ans);
+}
+
+static void cmd_temp_curve_eval(void)
+{
+    char ans[32] = {0};
+    uint8_t * p;
+    char arg[16] = {0};
+
+    p = (uint8_t*)strstr(cmd_buffer, CMD_TEMP_CURVE_EVAL);
+    p += strlen(CMD_TEMP_CURVE_EVAL);
+    p += 1;     // +1 for space
+
+    if (!isdigit(*p))
+    {
+        arg_error = true;
+    }
+    else
+    {
+        uint8_t i = 0;
+        uint16_t time;
+        q16_16_t temp;
+
+        while ((i != 15) && isdigit(*p))
+        {
+            arg[i++] = *(p++);
+        }
+
+        arg[i] = NULL;
+
+        time = (uint16_t)atoi(arg);
+
+        temp = temp_curve_eval(time);
+
+        sprintf(ans, "%lf%s", q16_16_to_double(temp), NEWLINE);
+        uart_write_string(ans);
+    }
 }
 
 static void get_flash(void)
