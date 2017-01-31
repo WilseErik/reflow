@@ -87,6 +87,12 @@ static const char GET_PID_KI[]      = "get ki";
 static const char GET_PID_KD[]      = "get kd";
 
 /*§
+ Gets the servo output scaling factor.
+ Return: <scaling factor as positive float value>
+ */
+static const char GET_PID_SERVO_FACTOR[] = "get pid servo factor";
+
+/*§
  Sets the heater on or off.
  Parameter: <'on' or 'off'>
  */
@@ -121,6 +127,12 @@ static const char SET_PID_KI[]      = "set ki";
  Parameter: <Value in the range [-65535.0, 65535.0]>
  */
 static const char SET_PID_KD[]      = "set kd";
+
+/*§
+ Sets how much the servo should extend for negative control values.
+ Paramter: <positive float scaling value>
+ */
+static const char SET_PID_SERVO_FACTOR[] = "set pid servo factor";
 
 /*§
  Activates the heater PWM and sets the pwm value.
@@ -160,6 +172,7 @@ static void get_flash(void);
 static void get_pid_kp(void);
 static void get_pid_ki(void);
 static void get_pid_kd(void);
+static void get_pid_servo_factor(void);
 
 static void set_heater(void);
 static void set_servo_pos(void);
@@ -168,6 +181,7 @@ static void set_flash(void);
 static void set_pid_kp(void);
 static void set_pid_ki(void);
 static void set_pid_kd(void);
+static void set_pid_servo_factor(void);
 
 static void set_heat_pwm(void);
 
@@ -229,6 +243,10 @@ static void execute_command(void)
         {
             get_pid_kd();
         }
+        else if (NULL != strstr(cmd_buffer, GET_PID_SERVO_FACTOR))
+        {
+            get_pid_servo_factor();
+        }
         else
         {
             syntax_error = true;
@@ -259,6 +277,10 @@ static void execute_command(void)
         else if (NULL != strstr(cmd_buffer, SET_PID_KD))
         {
             set_pid_kd();
+        }
+        else if (NULL != strstr(cmd_buffer, SET_PID_SERVO_FACTOR))
+        {
+            set_pid_servo_factor();
         }
         else if (NULL != strstr(cmd_buffer, SET_HEAT_PWM))
         {
@@ -379,6 +401,16 @@ static void get_pid_kd(void)
     char ans[32];
 
     sprintf(ans, "%lf%s", q16_16_to_double(control_get_kd()), NEWLINE);
+    uart_write_string(ans);
+}
+
+static void get_pid_servo_factor(void)
+{
+    char ans[32];
+
+    sprintf(ans, "%lf%s", q16_16_to_double(
+            (q16_16_t)flash_read_dword(FLASH_INDEX_SERVO_FACTOR)),
+            NEWLINE);
     uart_write_string(ans);
 }
 
@@ -531,7 +563,7 @@ static void set_pid_kp(void)
         control_set_kp(kp);
         
         flash_init_write_buffer();
-        flash_write_word_to_buffer(FLASH_INDEX_KP, (uint16_t)kp);
+        flash_write_dword_to_buffer(FLASH_INDEX_KP, (uint32_t)kp);
         flash_write_buffer_to_flash();
     }
 }
@@ -563,7 +595,7 @@ static void set_pid_ki(void)
         control_set_ki(ki);
 
         flash_init_write_buffer();
-        flash_write_word_to_buffer(FLASH_INDEX_KI, (uint16_t)ki);
+        flash_write_dword_to_buffer(FLASH_INDEX_KI, (uint32_t)ki);
         flash_write_buffer_to_flash();
     }
 }
@@ -595,7 +627,37 @@ static void set_pid_kd(void)
         control_set_kd(kd);
 
         flash_init_write_buffer();
-        flash_write_word_to_buffer(FLASH_INDEX_KD, (uint16_t)kd);
+        flash_write_dword_to_buffer(FLASH_INDEX_KD, (uint32_t)kd);
+        flash_write_buffer_to_flash();
+    }
+}
+
+static void set_pid_servo_factor(void)
+{
+    uint8_t * p;
+    char arg[16] = {0};
+    uint8_t i = 0;
+
+    p = (uint8_t*)strstr(cmd_buffer, SET_PID_SERVO_FACTOR);
+    p += strlen(SET_PID_SERVO_FACTOR);
+    p += 1;     // +1 for space
+
+    while (isdigit(*p) || ('.' == *p))
+    {
+        arg[i++] = *(p++);
+    }
+
+    arg[i] = NULL;
+
+    arg_error = (0 == i);
+
+    if (!arg_error)
+    {
+        double factor_as_double = -1.0 * atoi(arg);
+        q16_16_t factor = double_to_q16_16(factor_as_double);
+
+        flash_init_write_buffer();
+        flash_write_dword_to_buffer(FLASH_INDEX_SERVO_FACTOR, (uint32_t)factor);
         flash_write_buffer_to_flash();
     }
 }
