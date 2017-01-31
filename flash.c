@@ -136,6 +136,8 @@ void flash_init(void)
             flash_write_word_to_buffer(time[i], 0);
             index += 2;
         }
+
+        flash_write_buffer_to_flash();
     }
 
     if (0 == flash_read_word(FLASH_INDEX_LEAD_TEMP_CURVE_SIZE))
@@ -164,6 +166,8 @@ void flash_init(void)
             flash_write_word_to_buffer(time[i], 0);
             index += 2;
         }
+
+        flash_write_buffer_to_flash();
     }
 }
 
