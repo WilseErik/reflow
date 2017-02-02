@@ -134,7 +134,7 @@ void flash_init(void)
         {
             flash_write_dword_to_buffer(index, int_to_q16_16(temp[i]));
             index += 4;
-            flash_write_word_to_buffer(time[i], 0);
+            flash_write_word_to_buffer(index, time[i]);
             index += 2;
         }
 
@@ -164,7 +164,7 @@ void flash_init(void)
         {
             flash_write_dword_to_buffer(index, int_to_q16_16(temp[i]));
             index += 4;
-            flash_write_word_to_buffer(time[i], 0);
+            flash_write_word_to_buffer(index, time[i]);
             index += 2;
         }
 
@@ -175,7 +175,7 @@ void flash_init(void)
     {
         flash_init_write_buffer();
         flash_write_dword_to_buffer(FLASH_INDEX_SERVO_FACTOR,
-                                   (uint32_t)DOUBLE_TO_Q16_16(-1200.0/50.0));
+                                   (uint32_t)DOUBLE_TO_Q16_16(1200.0/50.0));
         flash_write_buffer_to_flash();
     }
 }
