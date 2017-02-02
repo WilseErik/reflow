@@ -16,6 +16,7 @@
 #include "flash.h"
 #include "led.h"
 #include "temp_curve.h"
+#include "lcd.h"
 
 // =============================================================================
 // Private type definitions
@@ -88,6 +89,13 @@ void init(void)
 
         temp_curve_init(TEMP_CURVE_LEAD_FREE);
     }
+
+    while (timers_get_millis() < 50)
+    {
+        ;
+    }
+
+    lcd_init();
 }
 
 // =============================================================================
