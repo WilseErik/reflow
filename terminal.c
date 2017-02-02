@@ -67,7 +67,7 @@ static const char CMD_TEST_TEMP[]   = "test temp";
  Parameters: <seconds in to reflow program>
  Returns: <target temperature>
  */
-static const char CMD_TEMP_CURVE_EVAL[] = "temp curve eval ";
+static const char CMD_TEMP_CURVE_EVAL[] = "temp curve eval";
 
 /*§
  Gets one byte from the flash data memory.
