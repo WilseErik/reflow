@@ -430,6 +430,8 @@ static inline void handle_switch_to_lead_profile(void)
              flash_read_word(FLASH_INDEX_LEAD_COOL_START_SEC));
 
     temp_curve_init(TEMP_CURVE_LEAD);
+
+    uart_write_string("Switch to lead profile\r\n");
 }
 
 static inline void handle_switch_to_lead_free_profile(void)
@@ -441,4 +443,6 @@ static inline void handle_switch_to_lead_free_profile(void)
              flash_read_word(FLASH_INDEX_LEAD_FREE_COOL_START_SEC));
 
     temp_curve_init(TEMP_CURVE_LEAD_FREE);
+
+    uart_write_string("Switch to lead free profile\r\n");
 }
