@@ -92,7 +92,7 @@ void temp_curve_init(temp_curve_variant_t variant)
     {
         lookup_table[i].temp = (q16_16_t)flash_read_dword(flash_index);
         lookup_table[i].time = flash_read_word(flash_index + sizeof(q16_16_t));
-
+        
         flash_index += sizeof(temp_curve_calib_point_t);
     }
 }
@@ -146,9 +146,18 @@ q16_16_t temp_curve_eval(uint16_t time)
         y1 = lookup_table[i - 1].temp;
         y2 = lookup_table[i    ].temp;
 
-        derivate = q16_16_divide((y2 - y1), (x2 - x1));
+        if (y2 >= y1)
+        {
+            derivate = q16_16_divide((y2 - y1), (x2 - x1));
 
-        ret_val = y1 + q16_16_multiply(derivate, time - x1);
+            ret_val = y1 + q16_16_multiply(derivate, int_to_q16_16(time) - x1);
+        }
+        else
+        {
+            derivate = q16_16_divide((y2 - y1), (x1 - x2));
+
+            ret_val = y1 - q16_16_multiply(derivate, int_to_q16_16(time) - x1);
+        }
     }
 
     return ret_val;
