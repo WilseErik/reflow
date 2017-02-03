@@ -285,7 +285,12 @@ static void run_next_in_queue(void)
  */
 static void queue_instr_clear_display(void)
 {
-    uint16_t next = task_queue.last + 1;
+    uint16_t next = task_queue.last;
+    
+    if (task_queue.tasks[next].valid)
+    {
+        ++next;
+    }
 
     if (TASK_QUEUE_SIZE == next)
     {
@@ -306,7 +311,12 @@ static void queue_instr_clear_display(void)
  */
 static void queue_instr_return_home(void)
 {
-    uint16_t next = task_queue.last + 1;
+    uint16_t next = task_queue.last;
+
+    if (task_queue.tasks[next].valid)
+    {
+        ++next;
+    }
 
     if (TASK_QUEUE_SIZE == next)
     {
@@ -327,7 +337,12 @@ static void queue_instr_return_home(void)
  */
 static void queue_instr_entry_mode_set(bool i_d, bool s)
 {
-    uint16_t next = task_queue.last + 1;
+    uint16_t next = task_queue.last;
+
+    if (task_queue.tasks[next].valid)
+    {
+        ++next;
+    }
 
     if (TASK_QUEUE_SIZE == next)
     {
@@ -356,7 +371,12 @@ static void queue_instr_display_on_off(bool disp_on,
                                         bool cursor_on,
                                         bool cursor_pos_on)
 {
-    uint16_t next = task_queue.last + 1;
+    uint16_t next = task_queue.last;
+
+    if (task_queue.tasks[next].valid)
+    {
+        ++next;
+    }
 
     if (TASK_QUEUE_SIZE == next)
     {
@@ -385,7 +405,12 @@ static void queue_instr_display_on_off(bool disp_on,
  */
 static void queue_instr_disp_shift(bool s_c, bool r_l)
 {
-    uint16_t next = task_queue.last + 1;
+    uint16_t next = task_queue.last;
+
+    if (task_queue.tasks[next].valid)
+    {
+        ++next;
+    }
 
     if (TASK_QUEUE_SIZE == next)
     {
@@ -414,7 +439,12 @@ static void queue_instr_function_set(bool use_8_bit_interface,
                                       bool use_2_lines,
                                       bool font_size_5_11)
 {
-    uint16_t next = task_queue.last + 1;
+    uint16_t next = task_queue.last;
+
+    if (task_queue.tasks[next].valid)
+    {
+        ++next;
+    }
 
     if (TASK_QUEUE_SIZE == next)
     {
@@ -443,7 +473,12 @@ static void queue_instr_function_set(bool use_8_bit_interface,
  */
 static void queue_instr_set_cgram_addr(uint8_t addr)
 {
-    uint16_t next = task_queue.last + 1;
+    uint16_t next = task_queue.last;
+
+    if (task_queue.tasks[next].valid)
+    {
+        ++next;
+    }
 
     if (TASK_QUEUE_SIZE == next)
     {
@@ -464,7 +499,12 @@ static void queue_instr_set_cgram_addr(uint8_t addr)
  */
 static void queue_instr_set_ddram_addr(uint8_t addr)
 {
-    uint16_t next = task_queue.last + 1;
+    uint16_t next = task_queue.last;
+
+    if (task_queue.tasks[next].valid)
+    {
+        ++next;
+    }
 
     if (TASK_QUEUE_SIZE == next)
     {
@@ -485,7 +525,12 @@ static void queue_instr_set_ddram_addr(uint8_t addr)
  */
 static void queue_instr_read_busy_flag(void)
 {
-    uint16_t next = task_queue.last + 1;
+    uint16_t next = task_queue.last;
+
+    if (task_queue.tasks[next].valid)
+    {
+        ++next;
+    }
 
     if (TASK_QUEUE_SIZE == next)
     {
@@ -511,7 +556,12 @@ static void queue_instr_read_busy_flag(void)
  */
 static void queue_instr_write_data_to_ram(uint8_t data)
 {
-    uint16_t next = task_queue.last + 1;
+    uint16_t next = task_queue.last;
+
+    if (task_queue.tasks[next].valid)
+    {
+        ++next;
+    }
 
     if (TASK_QUEUE_SIZE == next)
     {
@@ -532,7 +582,12 @@ static void queue_instr_write_data_to_ram(uint8_t data)
  */
 static void queue_instr_read_data_from_ram(void)
 {
-    uint16_t next = task_queue.last + 1;
+    uint16_t next = task_queue.last;
+
+    if (task_queue.tasks[next].valid)
+    {
+        ++next;
+    }
 
     if (TASK_QUEUE_SIZE == next)
     {
