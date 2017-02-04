@@ -30,7 +30,7 @@ extern "C" {
 // bit 16
 // For example 1.75 is represented as: 00000000 00000001 . 11000000 00000000
 //
-typedef uint32_t q16_16_t;
+typedef int32_t q16_16_t;
 
 // =============================================================================
 // Global constatants
@@ -53,9 +53,9 @@ typedef uint32_t q16_16_t;
  */
 static inline q16_16_t q16_16_multiply(q16_16_t a, q16_16_t b)
 {
-    uint64_t p;
+    int64_t p;
 
-    p = (uint64_t)a * (uint64_t)b;
+    p = (int64_t)a * (int64_t)b;
     p = p >> 16;
     return (q16_16_t)p;
 }
@@ -68,9 +68,9 @@ static inline q16_16_t q16_16_multiply(q16_16_t a, q16_16_t b)
  */
 static inline q16_16_t q16_16_divide(q16_16_t a, q16_16_t b)
 {
-    uint64_t q;
+    int64_t q;
 
-    q = (uint64_t)a << 16;
+    q = (int64_t)a << 16;
     q /= b;
 
     return (q16_16_t)q;
@@ -81,9 +81,16 @@ static inline q16_16_t q16_16_divide(q16_16_t a, q16_16_t b)
  * @param t - the time to round down.
  * @return The number of floored number of stepps in t.
  */
-static inline uint16_t q16_16_floor(q16_16_t t)
+static inline int16_t q16_16_floor(q16_16_t t)
 {
-    return t & 0xFFFF0000;
+    if (t >= 0)
+    {
+        return t & 0xFFFF0000;
+    }
+    else
+    {
+        return (t & 0xFFFF0000) - Q16_16_T_ONE;
+    }
 }
 
 /**
@@ -93,7 +100,14 @@ static inline uint16_t q16_16_floor(q16_16_t t)
  */
 static inline uint16_t q16_16_ceil(q16_16_t t)
 {
-    return (t & 0xFFFF0000) + 0x00010000;
+    if (t >= 0)
+    {
+        return (t & 0xFFFF0000) + Q16_16_T_ONE;
+    }
+    else
+    {
+        return t & 0xFFFF0000;
+    }
 }
 
 /**
@@ -109,23 +123,25 @@ static inline q16_16_t q16_16_round(q16_16_t t)
     }
     else
     {
-        return (t & 0xFFFF0000) + 0x00010000;
+        return (t & 0xFFFF0000) + Q16_16_T_ONE;
     }
 }
+
+#define INT_TO_Q16_16(i) ((int32_t)i << 16)
 
 /**
  * @brief Converts an integer to the q16_16_t.
  * @param i - The integer to convert.
  * @return the q16_16_t representation of i.
  */
-static inline q16_16_t int_to_q16_16(uint16_t i)
+static inline q16_16_t int_to_q16_16(int16_t i)
 {
-    return ((uint32_t)i) << 16;
+    return ((int32_t)i) << 16;
 }
 
-static inline uint16_t q16_16_to_int(q16_16_t t)
+static inline int16_t q16_16_to_int(q16_16_t t)
 {
-    return (q16_16_round(t) >> 16);
+    return (int16_t)(q16_16_round(t) >> 16);
 }
 
 /**
