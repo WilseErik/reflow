@@ -40,7 +40,7 @@ typedef enum
 // Global constatants
 // =============================================================================
 
-#define LCD_LINE_LEN 14
+#define LCD_LINE_LEN 16
 
 // =============================================================================
 // Public function declarations
@@ -74,8 +74,8 @@ bool lcd_is_busy(void);
  * @param first_line - text to set for the upper lcd display line.
  * @param second_line - text to set for the lower lcd display line.
  */
-void lcd_set_text(char first_line[LCD_LINE_LEN],
-                  char second_line[LCD_LINE_LEN]);
+void lcd_set_text(const char first_line[LCD_LINE_LEN],
+                  const char second_line[LCD_LINE_LEN]);
 
 #ifdef	__cplusplus
 }

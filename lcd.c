@@ -63,13 +63,6 @@ typedef struct task_queue_t
 // Private constants
 // =============================================================================
 
-#define WAIT_1_USEC do {                                                       \
-                __builtin_nop;__builtin_nop;__builtin_nop;__builtin_nop;       \
-                __builtin_nop;__builtin_nop;__builtin_nop;__builtin_nop;       \
-                __builtin_nop;__builtin_nop;__builtin_nop;__builtin_nop;       \
-                __builtin_nop;__builtin_nop;__builtin_nop;__builtin_nop;       \
-                     } while (0)
-
 static const uint16_t DDRAM_FIRST_LINE_START = 0x00;
 static const uint16_t DDRAM_SECOND_LINE_START = 0x40;
 
@@ -139,6 +132,7 @@ static void lcd_timer_init(void);
  */
 static void start_wait(uint16_t microseconds_to_wait);
 
+
 /**
  * @brief Called every time a wait time completes.
  */
@@ -164,7 +158,7 @@ void lcd_init(void)
         queue_instr_function_set(true, true, true);
         
         // Disp on, no cursor
-        queue_instr_display_on_off(true, false, false);
+        queue_instr_display_on_off(true, true, true);
 
         queue_instr_clear_display();
 
@@ -189,8 +183,8 @@ bool lcd_is_busy(void)
     return queue_is_executing;
 }
 
-void lcd_set_text(char first_line[LCD_LINE_LEN],
-                  char second_line[LCD_LINE_LEN])
+void lcd_set_text(const char first_line[LCD_LINE_LEN],
+                  const char second_line[LCD_LINE_LEN])
 {
     // The first line starts at ddram address 0x00
     // The second line starts at ddram address 0x40
@@ -246,14 +240,6 @@ static void run_next_in_queue(void)
             LCD_RW_PIN = 1;
 
             LCD_SET_DATA_DIR_IN;
-            LCD_E_PIN = 1;
-
-            // Wait at least 460ns
-            WAIT_1_USEC;
-
-            LCD_E_PIN = 0;
-
-            start_wait(task_queue.tasks[i].wait_us);
         }
         else
         {
@@ -262,15 +248,30 @@ static void run_next_in_queue(void)
 
             LCD_SET_DATA_DIR_OUT;
             LCD_SET_DATA(task_queue.tasks[i].db);
-            LCD_E_PIN = 1;
-
-            // Wait at least 460ns
-            WAIT_1_USEC;
-
-            LCD_E_PIN = 0;
-
-            start_wait(task_queue.tasks[i].wait_us);
         }
+
+        // Wait at least 460ns
+        LCD_E_PIN = 1;
+        LCD_E_PIN = 1;
+        LCD_E_PIN = 1;
+        LCD_E_PIN = 1;
+        LCD_E_PIN = 1;
+        LCD_E_PIN = 1;
+        LCD_E_PIN = 1;
+        LCD_E_PIN = 1;
+        LCD_E_PIN = 1;
+        LCD_E_PIN = 1;
+        LCD_E_PIN = 1;
+        LCD_E_PIN = 1;
+        LCD_E_PIN = 1;
+        LCD_E_PIN = 1;
+        LCD_E_PIN = 1;
+        LCD_E_PIN = 1;
+
+
+        LCD_E_PIN = 0;
+
+        start_wait(task_queue.tasks[i].wait_us);
     }
     else if (!initialized)
     {
@@ -570,7 +571,7 @@ static void queue_instr_write_data_to_ram(uint8_t data)
 
     task_queue.tasks[next].rs = true;
     task_queue.tasks[next].rw = false;
-    task_queue.tasks[next].db = 0xC0 | (data & 0x3F);
+    task_queue.tasks[next].db = data;;
     task_queue.tasks[next].wait_us = 50;
     task_queue.tasks[next].valid = true;
 
@@ -642,7 +643,7 @@ static void lcd_timer_init(void)
     // Enable interrupt, low priority
     IFS1bits.T4IF = 0;
     IEC1bits.T4IE = 1;
-    IPC6bits.T4IP = 1;
+    IPC6bits.T4IP = 2;
 }
 
 static void start_wait(uint16_t microseconds_to_wait)
@@ -653,6 +654,7 @@ static void start_wait(uint16_t microseconds_to_wait)
     }
     else
     {
+        T4CON = 0x0000;
         TMR4 = 0x0000;
         // There is 16 timer4 ticks per microsecond
         PR4 = microseconds_to_wait << 4;
@@ -671,7 +673,11 @@ static void wait_time_complete(void)
     }
 
     task_queue.tasks[task_queue.first].valid = false;
-    task_queue.first = next_first;
+
+    if (task_queue.tasks[next_first].valid)
+    {
+        task_queue.first = next_first;
+    }
 
     run_next_in_queue();
 
