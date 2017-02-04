@@ -124,7 +124,6 @@ int main(void)
         //
         else if (status_check(STATUS_CRITICAL_ERROR_FLAG))
             handle_critical_error_event();
-#if 0
         //
         // Run control loop
         //
@@ -133,7 +132,6 @@ int main(void)
         //
         // Start temp reading
         //
-#endif
         else if (status_check(STATUS_START_TEMP_READING_FLAG))
             handle_start_temp_reading_event();
         //
@@ -171,7 +169,6 @@ int main(void)
         //
         else if (status_check(STATUS_START_BUTTON_PUSHED_FLAG))
             handle_start_button_event();
-#if 0
         //
         // Detect stalls
         //
@@ -179,7 +176,6 @@ int main(void)
                 (timers_get_millis() - max6675_get_last_reading_time() >
                  MAX_TIME_BETWEEN_TEMP_READINGS_MS))
             status_set(STATUS_CRITICAL_ERROR_FLAG, CRIT_ERR_READ_TIMEOUT);
-#endif
     }
 
     return EXIT_SUCCESS;
@@ -202,16 +198,28 @@ static inline void handle_stop_button_event(void)
 
 static inline void handle_critical_error_event(void)
 {
-    char msg[16] = {0};
+    char msg[17] = {0};
+    
+    timers_deactivate_heater_control();
     HEATER_OFF;
 
-    sprintf(msg, "Crit Err %d", status_check(STATUS_CRITICAL_ERROR_FLAG));
+    sprintf(msg, "Crit Error %d", status_check(STATUS_CRITICAL_ERROR_FLAG));
     uart_write_string(msg);
+
 
     DEBUG_1_LED_ON;
     DEBUG_2_LED_ON;
     DEBUG_3_LED_ON;
     DEBUG_4_LED_ON;
+
+    sprintf(msg, "Error code: %03u ", status_check(STATUS_CRITICAL_ERROR_FLAG));
+    
+    while (lcd_is_busy())
+    {
+        HEATER_OFF;
+    }
+
+    lcd_set_text("Critical error  ", msg);
 
     while (1)
     {
@@ -482,7 +490,7 @@ static inline void handle_uart_log_temp_event(void)
             uart_write_string("\n\rtemperature;time\r\n");
         }
 
-        sprintf(print, "temp = %03u.%02u; time = %u\r\n",
+        sprintf(print, "%03u.%02u;%u\r\n",
                 temp, temp_decimals, timers_get_reflow_time());
         uart_write_string(print);
     }
