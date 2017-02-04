@@ -115,10 +115,8 @@ void control_init(void)
     initialized = true;
 }
 
-q16_16_t control_update_pid(q16_16_t current_reading)
+void control_update_pid(q16_16_t current_reading)
 {
-    q16_16_t ret_val = 0;
-
     if (initialized)
     {
         q16_16_t error;
@@ -200,10 +198,9 @@ q16_16_t control_update_pid(q16_16_t current_reading)
     }
     else
     {
-        ret_val = 0;
+        timers_set_heater_duty(0);
+        servo_set_pos(0);
     }
-
-    return ret_val;
 }
 
 void control_set_target_value(q16_16_t target_value)

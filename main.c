@@ -233,60 +233,15 @@ static inline void handle_pid_event(void)
 
     if (status_check(STATUS_REFLOW_PROGRAM_ACTIVE))
     {
-        q16_16_t temp = int_to_q16_16(max6675_get_current_temp());
-        q16_16_t y = control_update_pid(temp >> 2);
+        q16_16_t temp;
+        q16_16_t y;
 
-        if (y >= 0)
-        {
-            uint16_t duty;
-            duty = (uint16_t)q16_16_to_int(y);
+        temp = int_to_q16_16(max6675_get_current_temp());
 
-            if (duty > TIMERS_HEATER_MAX_DUTY)
-            {
-                duty = TIMERS_HEATER_MAX_DUTY;
-            }
+        control_enable_servo(
+                status_check(STATUS_REFLOW_STATE) == STATUS_REFLOW_STATE_COOL);
 
-            timers_set_heater_duty((uint8_t)duty);
-            servo_set_pos(0);
-        }
-        else
-        {
-            uint16_t start_of_cool;
-
-            if (buttons_is_profile_switch_lead())
-            {
-                start_of_cool =
-                        flash_read_word(FLASH_INDEX_LEAD_COOL_START_SEC);
-            }
-            else
-            {
-                start_of_cool =
-                        flash_read_word(FLASH_INDEX_LEAD_FREE_COOL_START_SEC);
-            }
-
-            if (timers_get_reflow_time() < start_of_cool)
-            {
-                timers_set_heater_duty(0);
-                servo_set_pos(0);
-            }
-            else
-            {
-                q16_16_t servo_factor =
-                        (q16_16_t)flash_read_dword(FLASH_INDEX_SERVO_FACTOR);
-                int16_t servo_pos;
-
-                servo_pos = q16_16_to_int(q16_16_multiply(y, servo_factor));
-
-                if (servo_pos > SERVO_MAX_POS)
-                {
-                    servo_set_pos(SERVO_MAX_POS);
-                }
-                else
-                {
-                    servo_set_pos(servo_pos);
-                }
-            }
-        }
+        control_update_pid(temp >> 2);
     }
 }
 

@@ -85,7 +85,7 @@ void control_init(void);
  * @param current_temperature - The current temperature in the oven.
  * @return Calculated heater power to use.
  */
-q16_16_t control_update_pid(q16_16_t current_reading);
+void control_update_pid(q16_16_t current_reading);
 
 
 /**
