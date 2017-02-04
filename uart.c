@@ -212,6 +212,11 @@ void uart_write_array(uint16_t nbr_of_bytes, const uint8_t* data)
     start_tx();
 }
 
+bool uart_is_write_buffer_empty(void)
+{
+    return tx_buff_size == 0;
+}
+
 uint8_t uart_get(uint16_t index)
 {
     uint16_t i;

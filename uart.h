@@ -59,6 +59,12 @@ void uart_write_string(const char* data);
 void uart_write_array(uint16_t nbr_of_bytes, const uint8_t* data);
 
 /**
+ * @brief Checks if the write buffer is empty.
+ * @return True if the write buffer is empty.
+ */
+bool uart_is_write_buffer_empty(void);
+
+/**
  * @brief Gets a byte from the receive buffer.
  * @param index - The index of the byte to get.
  * @return The byte in the receive buffer at the specified index.
