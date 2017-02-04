@@ -37,10 +37,12 @@ typedef enum
     //
     // PID Control parameters
     //
-    FLASH_INDEX_KP          = 0x02,
-    FLASH_INDEX_KI          = 0x06,
-    FLASH_INDEX_KD          = 0x0A,
-    FLASH_INDEX_SERVO_FACTOR= 0x0E,
+    FLASH_INDEX_K           = 0x02, // PID gain
+    FLASH_INDEX_TI          = 0x06, // PID integral time contant
+    FLASH_INDEX_TD          = 0x0A, // PID prediction horizon
+    FLASH_INDEX_TTR         = 0x0E, // PID Integral tracking time constant
+    FLASH_INDEX_D_MAX_GAIN  = 0x12,
+    FLASH_INDEX_SERVO_FACTOR= 0x16,
 
     //
     // Temperature curve
