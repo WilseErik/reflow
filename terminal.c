@@ -505,7 +505,7 @@ static void get_pid_kp(void)
 {
     char ans[32];
 
-    sprintf(ans, "%lf%s", q16_16_to_double(control_get_kp()), NEWLINE);
+    sprintf(ans, "%lf%s", q16_16_to_double(control_get_k()), NEWLINE);
     uart_write_string(ans);
 }
 
@@ -513,14 +513,14 @@ static void get_pid_ki(void)
 {
     char ans[32];
 
-    sprintf(ans, "%lf%s", q16_16_to_double(control_get_ki()), NEWLINE);
+    sprintf(ans, "%lf%s", q16_16_to_double(control_get_ti()), NEWLINE);
     uart_write_string(ans);
 }
 static void get_pid_kd(void)
 {
     char ans[32];
 
-    sprintf(ans, "%lf%s", q16_16_to_double(control_get_kd()), NEWLINE);
+    sprintf(ans, "%lf%s", q16_16_to_double(control_get_td()), NEWLINE);
     uart_write_string(ans);
 }
 
@@ -740,10 +740,10 @@ static void set_pid_kp(void)
         double kp_as_double = atoi(arg);
         q16_16_t kp = double_to_q16_16(kp_as_double);
 
-        control_set_kp(kp);
+        control_set_k(kp);
         
         flash_init_write_buffer();
-        flash_write_dword_to_buffer(FLASH_INDEX_KP, (uint32_t)kp);
+        flash_write_dword_to_buffer(FLASH_INDEX_K, (uint32_t)kp);
         flash_write_buffer_to_flash();
     }
 }
@@ -772,10 +772,10 @@ static void set_pid_ki(void)
         double ki_as_double = atoi(arg);
         q16_16_t ki = double_to_q16_16(ki_as_double);
 
-        control_set_ki(ki);
+        control_set_ti(ki);
 
         flash_init_write_buffer();
-        flash_write_dword_to_buffer(FLASH_INDEX_KI, (uint32_t)ki);
+        flash_write_dword_to_buffer(FLASH_INDEX_TI, (uint32_t)ki);
         flash_write_buffer_to_flash();
     }
 }
@@ -804,10 +804,10 @@ static void set_pid_kd(void)
         double kd_as_double = atoi(arg);
         q16_16_t kd = double_to_q16_16(kd_as_double);
 
-        control_set_kd(kd);
+        control_set_td(kd);
 
         flash_init_write_buffer();
-        flash_write_dword_to_buffer(FLASH_INDEX_KD, (uint32_t)kd);
+        flash_write_dword_to_buffer(FLASH_INDEX_TD , (uint32_t)kd);
         flash_write_buffer_to_flash();
     }
 }

@@ -38,46 +38,46 @@ extern "C" {
  * @brief Sets the proportional part of the PID regulator.
  * @param kp - proportional part to set.
  */
-void control_set_kp(q16_16_t kp);
+void control_set_k(q16_16_t k);
 
 /**
  * @brief Sets the integral part of the PID regulator.
  * @param ki - integral part to set.
  */
-void control_set_ki(q16_16_t ki);
+void control_set_ti(q16_16_t ti);
 
 /**
  * @brief Sets the derivate part of the PID regulator.
  * @param kd - derivate part to set.
  */
-void control_set_kd(q16_16_t kd);
+void control_set_td(q16_16_t td);
 
 /**
  * @brief Gets the P part of the PID regulator.
  * @return P contant in the PID regulator.
  */
-q16_16_t control_get_kp(void);
+q16_16_t control_get_k(void);
 
 
 /**
  * @brief Gets the I part of the PID regulator.
  * @return I contant in the PID regulator.
  */
-q16_16_t control_get_ki(void);
+q16_16_t control_get_ti(void);
 
 
 /**
  * @brief Gets the D part of the PID regulator.
  * @return D contant in the PID regulator.
  */
-q16_16_t control_get_kd(void);
+q16_16_t control_get_td(void);
 
 
 /**
  * @brief Inititalizes the temperature regulator.
  * @details Kp, Ki and Kd values should be set before calling this function.
  */
-void control_start(void);
+void control_init(void);
 
 
 /**
@@ -93,6 +93,12 @@ q16_16_t control_update_pid(q16_16_t current_reading);
  * @param target_value - new target value to regulate towards.
  */
 void control_set_target_value(q16_16_t target_value);
+
+/**
+ * @breif Enables or disables the controler to use the servo for cooling.
+ * @param enable - true = enabled, false = disabled.
+ */
+void control_enable_servo(bool enable);
 
 
 #ifdef	__cplusplus
