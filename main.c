@@ -141,13 +141,11 @@ int main(void)
         //
         else if (status_check(STATUS_REFLOW_TIME_UPDATED_FLAG))
             handle_reflow_time_update_event();
-#if 0
         //
         // Refresh LCD screen
         //
         else if (status_check(STATUS_LCD_REFRESH_FLAG))
             handle_lcd_refresh_event();
-#endif
         //
         // Log temp over UART
         //
@@ -349,8 +347,7 @@ static inline void handle_lcd_refresh_event(void)
         temp = temp >> 2;
 
         status_clear(STATUS_LCD_REFRESH_FLAG);
-        sprintf(upper_line, "T = %03u.%02u C ", temp, temp_decimals);
-        upper_line[13] = ' ';
+        sprintf(upper_line, "T = %03u.%02u C    ", temp, temp_decimals);
 
         for (char_nbr = 0; char_nbr != LCD_LINE_LEN; ++char_nbr)
         {
