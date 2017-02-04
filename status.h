@@ -36,6 +36,7 @@ typedef enum
 
     // Status runtime values
     STATUS_REFLOW_PROGRAM_ACTIVE,
+    STATUS_REFLOW_STATE,
 
     STATUS_BYTE_LAST
 } status_byte_index_t;
@@ -49,7 +50,15 @@ typedef enum
     CRIT_ERR_READ_TIMEOUT,
 } critical_error_t;
 
-typedef bool status_item_t;
+typedef enum
+{
+    STATUS_REFLOW_STATE_PREHEAT,
+    STATUS_REFLOW_STATE_SOAK,
+    STATUS_REFLOW_STATE_REFLOW,
+    STATUS_REFLOW_STATE_COOL
+} status_reflow_state_t;
+
+typedef uint8_t status_item_t;
     
 // =============================================================================
 // Global variable declarations
