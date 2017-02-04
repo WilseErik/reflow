@@ -313,6 +313,45 @@ static inline void handle_reflow_time_update_event(void)
     if (prog_active)
     {
         control_set_target_value(temp_curve_eval(time));
+
+        if (buttons_is_profile_switch_lead())
+        {
+            if (time < flash_read_word(FLASH_INDEX_LEAD_SOAK_START_SEC))
+            {
+                status_set(STATUS_REFLOW_STATE, STATUS_REFLOW_STATE_PREHEAT);
+            }
+            else if (time < flash_read_word(FLASH_INDEX_LEAD_REFLOW_START_SEC))
+            {
+                status_set(STATUS_REFLOW_STATE, STATUS_REFLOW_STATE_SOAK);
+            }
+            else if (time < flash_read_word(FLASH_INDEX_LEAD_COOL_START_SEC))
+            {
+                status_set(STATUS_REFLOW_STATE, STATUS_REFLOW_STATE_REFLOW);
+            }
+            else
+            {
+                status_set(STATUS_REFLOW_STATE, STATUS_REFLOW_STATE_COOL);
+            }
+        }
+        else
+        {
+            if (time < flash_read_word(FLASH_INDEX_LEAD_FREE_SOAK_START_SEC))
+            {
+                status_set(STATUS_REFLOW_STATE, STATUS_REFLOW_STATE_PREHEAT);
+            }
+            else if (time < flash_read_word(FLASH_INDEX_LEAD_FREE_REFLOW_START_SEC))
+            {
+                status_set(STATUS_REFLOW_STATE, STATUS_REFLOW_STATE_SOAK);
+            }
+            else if (time < flash_read_word(FLASH_INDEX_LEAD_FREE_COOL_START_SEC))
+            {
+                status_set(STATUS_REFLOW_STATE, STATUS_REFLOW_STATE_REFLOW);
+            }
+            else
+            {
+                status_set(STATUS_REFLOW_STATE, STATUS_REFLOW_STATE_COOL);
+            }
+        }
     }
 }
 
@@ -320,11 +359,13 @@ static inline void handle_lcd_refresh_event(void)
 {
     if (!lcd_is_busy())
     {
-        static char upper_line[LCD_LINE_LEN];
-        static char lower_line[LCD_LINE_LEN];
+        char upper_line[LCD_LINE_LEN + 1];
+        char lower_line[LCD_LINE_LEN + 1];
         uint16_t temp;
         uint8_t temp_decimals;
-        uint16_t char_nbr;
+        uint8_t minutes = 0;
+        uint8_t seconds = 0;
+        char reflow_profile[12];
 
         temp = max6675_get_current_temp();
 
@@ -347,11 +388,57 @@ static inline void handle_lcd_refresh_event(void)
         temp = temp >> 2;
 
         status_clear(STATUS_LCD_REFRESH_FLAG);
-        sprintf(upper_line, "T = %03u.%02u C    ", temp, temp_decimals);
-
-        for (char_nbr = 0; char_nbr != LCD_LINE_LEN; ++char_nbr)
+        
+        if (status_check(STATUS_REFLOW_PROGRAM_ACTIVE))
         {
-            lower_line[char_nbr] = ' ';
+            uint16_t time_left = temp_curve_get_time_of_last_val();
+            time_left -= timers_get_reflow_time();
+
+            seconds = time_left % 60;
+            minutes = time_left / 60;
+        }
+        else
+        {
+            minutes = 0;
+            seconds = 0;
+        }
+
+        sprintf(upper_line, "%03u.%02u C   %02u:%02u ",
+                temp, temp_decimals, minutes, seconds);
+
+        if (buttons_is_profile_switch_lead())
+        {
+            sprintf(reflow_profile, "    Pb-free");
+        }
+        else
+        {
+            sprintf(reflow_profile, "60/40 Sn-Pb");
+        }
+
+        if (status_check(STATUS_REFLOW_PROGRAM_ACTIVE))
+        {
+            switch (status_check(STATUS_REFLOW_STATE))
+            {
+            case STATUS_REFLOW_STATE_PREHEAT:
+                sprintf(lower_line, "Preheating      ");
+                break;
+
+            case STATUS_REFLOW_STATE_SOAK:
+                sprintf(lower_line, "Soaking         ");
+                break;
+
+            case STATUS_REFLOW_STATE_REFLOW:
+                sprintf(lower_line, "Reflowing       ");
+                break;
+
+            case STATUS_REFLOW_STATE_COOL:
+                sprintf(lower_line, "Cooling         ");
+                break;
+            }
+        }
+        else
+        {
+            sprintf(lower_line, "Idle %s", reflow_profile);
         }
 
         lcd_set_text(upper_line, lower_line);
