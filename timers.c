@@ -162,6 +162,11 @@ void timers_set_heater_duty(uint8_t duty)
     }
 }
 
+uint8_t timers_get_heater_duty(void)
+{
+    return heater_duty;
+}
+
 uint16_t timers_get_reflow_time(void)
 {
     volatile uint16_t t1;

@@ -51,10 +51,16 @@ void timers_activate_heater_control(void);
 void timers_deactivate_heater_control(void);
 
 /**
- * @bruef Sets the duty cycle of the heater element.
+ * @breif Sets the duty cycle of the heater element.
  * @param duty - Duty cycle in range [0, 50].
  */
 void timers_set_heater_duty(uint8_t duty);
+
+/**
+ * @breif Gets the duty cycle of the heater element.
+ * @return Current duty cycle in range [0, 50].
+ */
+uint8_t timers_get_heater_duty(void);
 
 /**
  * @brief Gets the amount of seconds passed since the current reflow program
