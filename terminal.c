@@ -95,6 +95,18 @@ static const char GET_PID_KI[]      = "get ki";
 static const char GET_PID_KD[]      = "get kd";
 
 /*§
+ Gets the PID integral tracking time constant.
+ Returns: <PID integral tracking time constant>
+ */
+static const char GET_PID_TTR[]     = "get ttr";
+
+/*§
+ Gets the max gain of the PID derivate term.
+ Returns: <Max PID derivate part gain>
+ */
+static const char GET_PID_D_MAX_GAIN[] = "get d max gain";
+
+/*§
  Gets the servo output scaling factor.
  Return: <scaling factor as positive float value>
  */
@@ -153,6 +165,18 @@ static const char SET_PID_KI[]      = "set ki";
  Parameter: <Value in the range [-65535.0, 65535.0]>
  */
 static const char SET_PID_KD[]      = "set kd";
+
+/*§
+ Sets the integrator tracking time constant in the PID regulator.
+ Parameter: <Value in the range [0.0, 65535.0]>
+ */
+static const char SET_PID_TTR[]     = "set ttr";
+
+/*§
+ Sets the max gain of the PID derivative term.
+Parameter: <Value in the range [0.0, 65535.0]>
+ */
+static const char SET_PID_D_MAX_GAIN[] = "set d max gain";
 
 /*§
  Sets how much the servo should extend for negative control values.
@@ -220,6 +244,8 @@ static void get_flash(void);
 static void get_pid_kp(void);
 static void get_pid_ki(void);
 static void get_pid_kd(void);
+static void get_pid_ttr(void);
+static void get_pid_d_max_gain(void);
 static void get_pid_servo_factor(void);
 
 static void get_start_of_soak(void);
@@ -233,6 +259,8 @@ static void set_flash(void);
 static void set_pid_kp(void);
 static void set_pid_ki(void);
 static void set_pid_kd(void);
+static void set_pid_ttr(void);
+static void set_pid_max_d_gain(void);
 static void set_pid_servo_factor(void);
 
 static void set_start_of_soak(void);
@@ -299,6 +327,14 @@ static void execute_command(void)
         {
             get_pid_kd();
         }
+        else if (NULL != strstr(cmd_buffer, GET_PID_TTR))
+        {
+            get_pid_ttr();
+        }
+        else if (NULL != strstr(cmd_buffer, GET_PID_D_MAX_GAIN))
+        {
+            get_pid_d_max_gain();
+        }
         else if (NULL != strstr(cmd_buffer, GET_PID_SERVO_FACTOR))
         {
             get_pid_servo_factor();
@@ -345,6 +381,14 @@ static void execute_command(void)
         else if (NULL != strstr(cmd_buffer, SET_PID_KD))
         {
             set_pid_kd();
+        }
+        else if (NULL != strstr(cmd_buffer, SET_PID_TTR))
+        {
+            set_pid_ttr();
+        }
+        else if (NULL != strstr(cmd_buffer, SET_PID_D_MAX_GAIN))
+        {
+            set_pid_max_d_gain();
         }
         else if (NULL != strstr(cmd_buffer, SET_PID_SERVO_FACTOR))
         {
@@ -521,6 +565,26 @@ static void get_pid_kd(void)
     char ans[32];
 
     sprintf(ans, "%lf%s", q16_16_to_double(control_get_td()), NEWLINE);
+    uart_write_string(ans);
+}
+
+static void get_pid_ttr(void)
+{
+    char ans[32];
+
+    q16_16_t t_tr = (q16_16_t)flash_read_dword(FLASH_INDEX_TTR);
+
+    sprintf(ans, "%lf%s", q16_16_to_double(t_tr), NEWLINE);
+    uart_write_string(ans);
+}
+
+static void get_pid_d_max_gain(void)
+{
+    char ans[32];
+
+    q16_16_t d_max_gain = (q16_16_t)flash_read_dword(FLASH_INDEX_D_MAX_GAIN);
+
+    sprintf(ans, "%lf%s", q16_16_to_double(d_max_gain), NEWLINE);
     uart_write_string(ans);
 }
 
@@ -808,6 +872,66 @@ static void set_pid_kd(void)
 
         flash_init_write_buffer();
         flash_write_dword_to_buffer(FLASH_INDEX_TD , (uint32_t)kd);
+        flash_write_buffer_to_flash();
+    }
+}
+
+static void set_pid_ttr(void)
+{
+    uint8_t * p;
+    char arg[16] = {0};
+    uint8_t i = 0;
+
+    p = (uint8_t*)strstr(cmd_buffer, SET_PID_TTR);
+    p += strlen(SET_PID_TTR);
+    p += 1;     // +1 for space
+
+    while (isdigit(*p) || ('.' == *p))
+    {
+        arg[i++] = *(p++);
+    }
+
+    arg[i] = NULL;
+
+    arg_error = (0 == i);
+
+    if (!arg_error)
+    {
+        double ttr_as_double = atoi(arg);
+        q16_16_t factor = double_to_q16_16(ttr_as_double);
+
+        flash_init_write_buffer();
+        flash_write_dword_to_buffer(FLASH_INDEX_TTR, (uint32_t)factor);
+        flash_write_buffer_to_flash();
+    }
+}
+
+static void set_pid_max_d_gain(void)
+{
+    uint8_t * p;
+    char arg[16] = {0};
+    uint8_t i = 0;
+
+    p = (uint8_t*)strstr(cmd_buffer, SET_PID_D_MAX_GAIN);
+    p += strlen(SET_PID_D_MAX_GAIN);
+    p += 1;     // +1 for space
+
+    while (isdigit(*p) || ('.' == *p))
+    {
+        arg[i++] = *(p++);
+    }
+
+    arg[i] = NULL;
+
+    arg_error = (0 == i);
+
+    if (!arg_error)
+    {
+        double factor_as_double = atoi(arg);
+        q16_16_t factor = double_to_q16_16(factor_as_double);
+
+        flash_init_write_buffer();
+        flash_write_dword_to_buffer(FLASH_INDEX_D_MAX_GAIN, (uint32_t)factor);
         flash_write_buffer_to_flash();
     }
 }

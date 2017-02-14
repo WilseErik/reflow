@@ -35,6 +35,14 @@ void terminal_help(char* in)
     {
         uart_write_string("\tGets the Dp constant in the PID regulator.\n\r\tReturns: <Dp value as  a decimal value>\n\r\t\n\r");
     }
+    else if (NULL != strstr(in, "get ttr"))
+    {
+        uart_write_string("\tGets the PID integral tracking time constant.\n\r\tReturns: <PID integral tracking time constant>\n\r\t\n\r");
+    }
+    else if (NULL != strstr(in, "get d max gain"))
+    {
+        uart_write_string("\tGets the max gain of the PID derivate term.\n\r\tReturns: <Max PID derivate part gain>\n\r\t\n\r");
+    }
     else if (NULL != strstr(in, "get pid servo factor"))
     {
         uart_write_string("\tGets the servo output scaling factor.\n\r\tReturn: <scaling factor as positive float value>\n\r\t\n\r");
@@ -75,6 +83,14 @@ void terminal_help(char* in)
     {
         uart_write_string("\tSets the Kd constant in the PID regulator.\n\r\tParameter: <Value in the range [-65535.0, 65535.0]>\n\r\t\n\r");
     }
+    else if (NULL != strstr(in, "set ttr"))
+    {
+        uart_write_string("\tSets the integrator tracking time constant in the PID regulator.\n\r\tParameter: <Value in the range [0.0, 65535.0]>\n\r\t\n\r");
+    }
+    else if (NULL != strstr(in, "set d max gain"))
+    {
+        uart_write_string("\tSets the max gain of the PID derivative term.\n\r\tParameter: <Value in the range [-0.0, 65535.0]>\n\r\t\n\r");
+    }
     else if (NULL != strstr(in, "set pid servo factor"))
     {
         uart_write_string("\tSets how much the servo should extend for negative control values.\n\r\tParamter: <positive float scaling value>\n\r\t\n\r");
@@ -100,7 +116,7 @@ void terminal_help(char* in)
         uart_write_string("\tType \"help <command>\" for more info\n\r");
         uart_write_string("\tAvailible commands:\n\r");
         uart_write_string("\t------------------------------------\n\r");
-        uart_write_string("\tget flash\n\r\tget kd\n\r\tget ki\n\r\tget kp\n\r\tget pid servo factor\n\r\tget start of cool\n\r\tget start of reflow\n\r\tget start of soak\n\r\thello\n\r\tset flash\n\r\tset heat pwm\n\r\tset heater\n\r\tset kd\n\r\tset ki\n\r\tset kp\n\r\tset pid servo factor\n\r\tset servo pos\n\r\tset start of cool\n\r\tset start of reflow\n\r\tset start of soak\n\r\ttemp curve eval\n\r\ttest temp\n\r\t");
+        uart_write_string("\tget d max gain\n\r\tget flash\n\r\tget kd\n\r\tget ki\n\r\tget kp\n\r\tget pid servo factor\n\r\tget start of cool\n\r\tget start of reflow\n\r\tget start of soak\n\r\tget ttr\n\r\thello\n\r\tset d max gain\n\r\tset flash\n\r\tset heat pwm\n\r\tset heater\n\r\tset kd\n\r\tset ki\n\r\tset kp\n\r\tset pid servo factor\n\r\tset servo pos\n\r\tset start of cool\n\r\tset start of reflow\n\r\tset start of soak\n\r\tset ttr\n\r\ttemp curve eval\n\r\ttest temp\n\r\t");
         uart_write_string("\n\r");
     }
 }
