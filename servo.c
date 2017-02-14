@@ -67,6 +67,8 @@
 // Private variables
 // =============================================================================
 
+static uint16_t current_position;
+
 // =============================================================================
 // Private function declarations
 // =============================================================================
@@ -154,10 +156,17 @@ void servo_set_pos(uint16_t position)
     uint16_t pulse_width_us = PULSE_WIDTH_MIN_US + position;
     uint32_t clock_counts = (TIMER_CLOCK_FREQ_HZ / 1000000) * pulse_width_us;
 
+    current_position = position;
+
     T3CONbits.TON = 0;
     SERVO_CONTROL_PIN = 0;
     TMR3 = 0x00000000;
     PR3 = calc_pr_reg(&T3CON, clock_counts);
+}
+
+uint16_t servo_get_pos(void)
+{
+    return current_position;
 }
 
 // =============================================================================

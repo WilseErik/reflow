@@ -41,6 +41,12 @@ void servo_init(void);
  */
 void servo_set_pos(uint16_t position);
 
+/**
+ * @brief Gets the current servo position.
+ * @return Current servo position.
+ */
+uint16_t servo_get_pos(void);
+
 #ifdef	__cplusplus
 }
 #endif
