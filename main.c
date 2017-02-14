@@ -234,7 +234,6 @@ static inline void handle_pid_event(void)
     if (status_check(STATUS_REFLOW_PROGRAM_ACTIVE))
     {
         q16_16_t temp;
-        q16_16_t y;
 
         temp = int_to_q16_16(max6675_get_current_temp());
 
@@ -442,11 +441,14 @@ static inline void handle_uart_log_temp_event(void)
         if (!not_first_time)
         {
             not_first_time = true;
-            uart_write_string("\n\rtemperature;time\r\n");
+            uart_write_string("\n\rtemperature;time;heater duty;servo pos\r\n");
         }
 
-        sprintf(print, "%03u.%02u;%u\r\n",
-                temp, temp_decimals, timers_get_reflow_time());
+        sprintf(print, "%03u.%02u;%04u;%02u;%03u\r\n",
+                temp, temp_decimals,
+                timers_get_reflow_time(),
+                timers_get_heater_duty(),
+                servo_get_pos());
         uart_write_string(print);
     }
 }
