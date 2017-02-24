@@ -70,6 +70,22 @@ static const char CMD_TEST_TEMP[]   = "test temp";
 static const char CMD_TEMP_CURVE_EVAL[] = "temp curve eval";
 
 /*§
+ Initiates the flash write buffer with the contents of theflash data memory.
+ */
+static const char CMD_INIT_WRITE_BUFFER[] = "init flash bufffer";
+
+/*§
+ Writes one byte to the flash buffer.
+ Paramters: <index in hex format> <one byte value in hex format>
+ */
+static const char CMD_BUFFERED_WRITE[] = "buffered write";
+
+/*§
+ Write the contents of the flash buffer to the flash memory.
+ */
+static const char CMD_FLUSH_BUFFER[]    = "flush flash buffer";
+
+/*§
  Gets one byte from the flash data memory.
  Parameter: <index in hex format>
  Returns: <hex value of byte at specified index>
@@ -238,6 +254,10 @@ static void execute_command(void);
 static void cmd_hello(void);
 static void cmd_test_temp(void);
 static void cmd_temp_curve_eval(void);
+
+static void cmd_init_flash_buffer(void);
+static void cmd_buffered_write(void);
+static void cmd_flush_buffer(void);
 
 static void get_flash(void);
 
@@ -429,6 +449,18 @@ static void execute_command(void)
         {
             cmd_temp_curve_eval();
         }
+        else if (NULL != strstr(cmd_buffer, CMD_INIT_WRITE_BUFFER))
+        {
+            cmd_init_flash_buffer();
+        }
+        else if (NULL != strstr(cmd_buffer, CMD_BUFFERED_WRITE))
+        {
+            cmd_buffered_write();
+        }
+        else if (NULL != strstr(cmd_buffer, CMD_FLUSH_BUFFER))
+        {
+            cmd_flush_buffer();
+        }
         else
         {
             syntax_error = true;
@@ -495,6 +527,77 @@ static void cmd_temp_curve_eval(void)
         sprintf(ans, "%lf%s", q16_16_to_double(temp), NEWLINE);
         uart_write_string(ans);
     }
+}
+
+static void cmd_init_flash_buffer(void)
+{
+    flash_init_write_buffer();
+}
+
+static void cmd_buffered_write(void)
+{
+    uint8_t * p;
+    char address_arg[HEX_WORD_STR_LEN] = {0};
+    char value_arg[HEX_BYTE_STR_LEN] = {0};
+
+    p = (uint8_t*)strstr(cmd_buffer, SET_FLASH);
+    p += strlen(SET_FLASH);
+    p += 1;     // +1 for space
+
+    if (!isxdigit(*p))
+    {
+        arg_error = true;
+    }
+    else
+    {
+        uint8_t i = 0;
+        uint16_t address;
+        uint8_t value;
+
+        //
+        // Parse address argument
+        //
+        while ((i != HEX_WORD_STR_LEN) && isxdigit(*p))
+        {
+            address_arg[i++] = *(p++);
+        }
+
+        address_arg[i] = NULL;
+        arg_error = arg_error || (i == 0);
+        address = (uint16_t)strtol(address_arg, NULL, 16);
+
+        //
+        // Parse value argument
+        //
+        p += 1; // +1 for space
+        i = 0;
+
+        while ((i != HEX_BYTE_STR_LEN) && isxdigit(*p))
+        {
+            value_arg[i++] = *(p++);
+        }
+
+        value_arg[i] = NULL;
+        arg_error = arg_error || (i == 0);
+        value = (uint8_t)strtol(value_arg, NULL, 16);
+
+        //
+        // Perform flash write
+        //
+        if (!arg_error && (address < FLASH_MEM_SIZE))
+        {
+            flash_write_byte_to_buffer((flash_index_t)address, value);
+        }
+        else
+        {
+            arg_error = true;
+        }
+    }
+}
+
+static void cmd_flush_buffer(void)
+{
+    flash_write_buffer_to_flash();
 }
 
 static void get_flash(void)

@@ -19,6 +19,18 @@ void terminal_help(char* in)
     {
         uart_write_string("\tEvalues the temperature curve at one point in time.\n\r\tParameters: <seconds in to reflow program>\n\r\tReturns: <target temperature>\n\r\t\n\r");
     }
+    else if (NULL != strstr(in, "init flash bufffer"))
+    {
+        uart_write_string("\tInitiates the flash write buffer with the contents of theflash data memory.\n\r\t\n\r");
+    }
+    else if (NULL != strstr(in, "buffered write"))
+    {
+        uart_write_string("\tWrites one byte to the flash buffer.\n\r\tParamters: <index in hex format> <one byte value in hex format>\n\r\t\n\r");
+    }
+    else if (NULL != strstr(in, "flush flash buffer"))
+    {
+        uart_write_string("\tWrite the contents of the flash buffer to the flash memory.\n\r\t\n\r");
+    }
     else if (NULL != strstr(in, "get flash"))
     {
         uart_write_string("\tGets one byte from the flash data memory.\n\r\tParameter: <index in hex format>\n\r\tReturns: <hex value of byte at specified index>\n\r\t\n\r");
@@ -89,7 +101,7 @@ void terminal_help(char* in)
     }
     else if (NULL != strstr(in, "set d max gain"))
     {
-        uart_write_string("\tSets the max gain of the PID derivative term.\n\r\tParameter: <Value in the range [-0.0, 65535.0]>\n\r\t\n\r");
+        uart_write_string("\tSets the max gain of the PID derivative term.\n\r\tParameter: <Value in the range [0.0, 65535.0]>\n\r\t\n\r");
     }
     else if (NULL != strstr(in, "set pid servo factor"))
     {
@@ -116,7 +128,7 @@ void terminal_help(char* in)
         uart_write_string("\tType \"help <command>\" for more info\n\r");
         uart_write_string("\tAvailible commands:\n\r");
         uart_write_string("\t------------------------------------\n\r");
-        uart_write_string("\tget d max gain\n\r\tget flash\n\r\tget kd\n\r\tget ki\n\r\tget kp\n\r\tget pid servo factor\n\r\tget start of cool\n\r\tget start of reflow\n\r\tget start of soak\n\r\tget ttr\n\r\thello\n\r\tset d max gain\n\r\tset flash\n\r\tset heat pwm\n\r\tset heater\n\r\tset kd\n\r\tset ki\n\r\tset kp\n\r\tset pid servo factor\n\r\tset servo pos\n\r\tset start of cool\n\r\tset start of reflow\n\r\tset start of soak\n\r\tset ttr\n\r\ttemp curve eval\n\r\ttest temp\n\r\t");
+        uart_write_string("\tbuffered write\n\r\tflush flash buffer\n\r\tget d max gain\n\r\tget flash\n\r\tget kd\n\r\tget ki\n\r\tget kp\n\r\tget pid servo factor\n\r\tget start of cool\n\r\tget start of reflow\n\r\tget start of soak\n\r\tget ttr\n\r\thello\n\r\tinit flash bufffer\n\r\tset d max gain\n\r\tset flash\n\r\tset heat pwm\n\r\tset heater\n\r\tset kd\n\r\tset ki\n\r\tset kp\n\r\tset pid servo factor\n\r\tset servo pos\n\r\tset start of cool\n\r\tset start of reflow\n\r\tset start of soak\n\r\tset ttr\n\r\ttemp curve eval\n\r\ttest temp\n\r\t");
         uart_write_string("\n\r");
     }
 }
