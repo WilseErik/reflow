@@ -413,6 +413,7 @@ static inline void handle_uart_log_temp_event(void)
     uint16_t temp;
     uint8_t temp_decimals;
     static bool not_first_time;
+    uint16_t current_time;
 
     status_clear(STATUS_UART_LOG_TEMP_FLAG);
 
@@ -441,14 +442,17 @@ static inline void handle_uart_log_temp_event(void)
         if (!not_first_time)
         {
             not_first_time = true;
-            uart_write_string("\n\rtemperature;time;heater duty;servo pos\r\n");
+            uart_write_string("\n\rtemperature;time;heater duty;servo pos;target temp\r\n");
         }
 
-        sprintf(print, "%03u.%02u;%04u;%02u;%03u\r\n",
+        current_time = timers_get_reflow_time();
+
+        sprintf(print, "%03u.%02u;%04u;%02u;%03u;%lf\r\n",
                 temp, temp_decimals,
-                timers_get_reflow_time(),
+                current_time,
                 timers_get_heater_duty(),
-                servo_get_pos());
+                servo_get_pos(),
+                q16_16_to_double(temp_curve_eval(current_time)));
         uart_write_string(print);
     }
 }
