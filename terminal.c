@@ -129,6 +129,12 @@ static const char GET_PID_D_MAX_GAIN[] = "get d max gain";
 static const char GET_PID_SERVO_FACTOR[] = "get pid servo factor";
 
 /*§
+ Gets the length of the moving average temperature filter.
+ Return: <lenght of filter>
+ */
+static const char GET_TEMP_FILTER_LEN[] = "get temp filter len";
+
+/*§
  Gets the timestamp in [s] for when the soak period starts.
  This is done for the profile selected by the reflow profile switch.
  */
@@ -201,6 +207,12 @@ static const char SET_PID_D_MAX_GAIN[] = "set d max gain";
 static const char SET_PID_SERVO_FACTOR[] = "set pid servo factor";
 
 /*§
+ Sets the length of the moving average temperature filter.
+ Return: <lenght of filter>
+ */
+static const char SET_TEMP_FILTER_LEN[] = "set temp filter len";
+
+/*§
  Activates the heater PWM and sets the pwm value.
  Parameter: <Duty in range [0, 50]>
  */
@@ -267,6 +279,7 @@ static void get_pid_kd(void);
 static void get_pid_ttr(void);
 static void get_pid_d_max_gain(void);
 static void get_pid_servo_factor(void);
+static void get_temp_filter_len(void);
 
 static void get_start_of_soak(void);
 static void get_start_of_reflow(void);
@@ -282,6 +295,7 @@ static void set_pid_kd(void);
 static void set_pid_ttr(void);
 static void set_pid_max_d_gain(void);
 static void set_pid_servo_factor(void);
+static void set_temp_filter_len(void);
 
 static void set_start_of_soak(void);
 static void set_start_of_reflow(void);
@@ -359,6 +373,10 @@ static void execute_command(void)
         {
             get_pid_servo_factor();
         }
+        else if (NULL != strstr(cmd_buffer, GET_TEMP_FILTER_LEN))
+        {
+            get_temp_filter_len();
+        }
         else if (NULL != strstr(cmd_buffer, GET_START_OF_SOAK))
         {
             get_start_of_soak();
@@ -413,6 +431,10 @@ static void execute_command(void)
         else if (NULL != strstr(cmd_buffer, SET_PID_SERVO_FACTOR))
         {
             set_pid_servo_factor();
+        }
+        else if (NULL != strstr(cmd_buffer, SET_TEMP_FILTER_LEN))
+        {
+            set_temp_filter_len();
         }
         else if (NULL != strstr(cmd_buffer, SET_HEAT_PWM))
         {
@@ -698,6 +720,14 @@ static void get_pid_servo_factor(void)
     sprintf(ans, "%lf%s", q16_16_to_double(
             (q16_16_t)flash_read_dword(FLASH_INDEX_SERVO_FACTOR)),
             NEWLINE);
+    uart_write_string(ans);
+}
+
+static void get_temp_filter_len(void)
+{
+    char ans[32];
+
+    sprintf(ans, "%lu%s", flash_read_dword(FLASH_INDEX_FILTER_LEN), NEWLINE);
     uart_write_string(ans);
 }
 
@@ -1065,6 +1095,35 @@ static void set_pid_servo_factor(void)
 
         flash_init_write_buffer();
         flash_write_dword_to_buffer(FLASH_INDEX_SERVO_FACTOR, (uint32_t)factor);
+        flash_write_buffer_to_flash();
+    }
+}
+
+static void set_temp_filter_len(void)
+{
+    uint8_t * p;
+    char arg[16] = {0};
+    uint8_t i = 0;
+
+    p = (uint8_t*)strstr(cmd_buffer, SET_TEMP_FILTER_LEN);
+    p += strlen(SET_TEMP_FILTER_LEN);
+    p += 1;     // +1 for space
+
+    while (isdigit(*p))
+    {
+        arg[i++] = *(p++);
+    }
+
+    arg[i] = NULL;
+
+    arg_error = (0 == i);
+
+    if (!arg_error)
+    {
+        uint32_t filter_len = atoi(arg);
+
+        flash_init_write_buffer();
+        flash_write_dword_to_buffer(FLASH_INDEX_FILTER_LEN, filter_len);
         flash_write_buffer_to_flash();
     }
 }
