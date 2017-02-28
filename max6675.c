@@ -13,6 +13,7 @@
 #include "gpio.h"
 #include "status.h"
 #include "timers.h"
+#include "flash.h"
 
 // =============================================================================
 // Private type definitions
@@ -25,7 +26,7 @@ typedef enum
     READ_STATE_READING_IC_2,
 } max6675_read_state_t;
 
-#define FILTER_BUFFER_SIZE 16
+#define FILTER_BUFFER_SIZE 256
 typedef struct
 {
     volatile uint16_t latest;
@@ -60,6 +61,7 @@ static volatile uint16_t ic1_reading;
 static volatile uint16_t ic2_reading;
 
 static volatile filter_buffer_t filter_buffer;
+static uint16_t filter_len = 16;
 
 static volatile uint32_t last_reading_timestamp;
 static volatile bool first_reading_complete = false;
@@ -109,6 +111,15 @@ void max6675_init(void)
 
     first_reading_complete = false;
     last_reading_timestamp = 0;
+
+    filter_len = flash_read_dword(FLASH_INDEX_FILTER_LEN);
+
+    if (filter_len > FILTER_BUFFER_SIZE)
+    {
+        flash_init_write_buffer();
+        flash_write_dword_to_buffer(FLASH_INDEX_FILTER_LEN, FILTER_BUFFER_SIZE);
+        flash_write_buffer_to_flash();
+    }
 
     IFS0bits.SPI1IF = 0;
     IEC0bits.SPI1IE = 1;
@@ -209,16 +220,16 @@ uint16_t max6675_read_blocking(void)
 
 static void add_reading(uint16_t temp)
 {
-    if (filter_buffer.size == FILTER_BUFFER_SIZE)
+    if (filter_buffer.size == filter_len)
     {
         filter_buffer.sum -= filter_buffer.buffer[filter_buffer.oldest];
         
-        if (FILTER_BUFFER_SIZE == ++(filter_buffer.oldest))
+        if (filter_len == ++(filter_buffer.oldest))
         {
             filter_buffer.oldest = 0;
         }
 
-        if (FILTER_BUFFER_SIZE == ++(filter_buffer.latest))
+        if (filter_len == ++(filter_buffer.latest))
         {
             filter_buffer.latest = 0;
         }
@@ -226,7 +237,7 @@ static void add_reading(uint16_t temp)
         filter_buffer.buffer[filter_buffer.latest] = temp;
         filter_buffer.sum += temp;
 
-        filter_buffer.mean = filter_buffer.sum / FILTER_BUFFER_SIZE;
+        filter_buffer.mean = filter_buffer.sum / filter_len;
     }
     else if (filter_buffer.size == 0)
     {

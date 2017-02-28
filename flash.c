@@ -178,6 +178,13 @@ void flash_init(void)
                                    (uint32_t)DOUBLE_TO_Q16_16(1200.0/50.0));
         flash_write_buffer_to_flash();
     }
+
+    if (0 == flash_read_dword(FLASH_INDEX_FILTER_LEN))
+    {
+        flash_init_write_buffer();
+        flash_write_dword_to_buffer(FLASH_INDEX_FILTER_LEN, 16);
+        flash_write_buffer_to_flash();
+    }
 }
 
 uint8_t flash_read_byte(flash_index_t index)

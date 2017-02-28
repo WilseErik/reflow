@@ -41,8 +41,9 @@ typedef enum
     FLASH_INDEX_TI          = 0x06, // PID integral time contant
     FLASH_INDEX_TD          = 0x0A, // PID prediction horizon
     FLASH_INDEX_TTR         = 0x0E, // PID Integral tracking time constant
-    FLASH_INDEX_D_MAX_GAIN  = 0x12,
-    FLASH_INDEX_SERVO_FACTOR= 0x16,
+    FLASH_INDEX_D_MAX_GAIN  = 0x12, // PID N
+    FLASH_INDEX_SERVO_FACTOR= 0x16, // Scaling between heater and servo output
+    FLASH_INDEX_FILTER_LEN  = 0x1A, // Length of temp. moving average filter.
 
     //
     // Temperature curve
