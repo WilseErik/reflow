@@ -93,28 +93,28 @@ static const char CMD_FLUSH_BUFFER[]    = "flush flash buffer";
 static const char GET_FLASH[]       = "get flash";
 
 /*§
- Gets the Kp constant in the PID regulator.
- Returns: <Kp value as  a decimal value>
+ Gets the K constant in the PID regulator.
+ Returns: <K value as a decimal value>
  */
-static const char GET_PID_KP[]      = "get kp";
+static const char GET_PID_KP[]      = "get K";
 
 /*§
- Gets the Ip constant in the PID regulator.
- Returns: <Ip value as  a decimal value>
+ Gets the Ti constant in the PID regulator.
+ Returns: <Ti value as a decimal value>
  */
-static const char GET_PID_KI[]      = "get ki";
+static const char GET_PID_KI[]      = "get Ti";
 
 /*§
- Gets the Dp constant in the PID regulator.
- Returns: <Dp value as  a decimal value>
+ Gets the Td constant in the PID regulator.
+ Returns: <Td value as a decimal value>
  */
-static const char GET_PID_KD[]      = "get kd";
+static const char GET_PID_KD[]      = "get Td";
 
 /*§
  Gets the PID integral tracking time constant.
  Returns: <PID integral tracking time constant>
  */
-static const char GET_PID_TTR[]     = "get ttr";
+static const char GET_PID_TTR[]     = "get Ttr";
 
 /*§
  Gets the max gain of the PID derivate term.
@@ -165,28 +165,28 @@ static const char SET_SERVO_POS[]   = "set servo pos";
 static const char SET_FLASH[]       = "set flash";
 
 /*§
- Sets the Kp constant in the PID regulator.
+ Sets the K constant in the PID regulator.
  Parameter: <Value in the range [-65535.0, 65535.0]>
  */
-static const char SET_PID_KP[]      = "set kp";
+static const char SET_PID_KP[]      = "set K";
 
 /*§
- Sets the Ki constant in the PID regulator.
+ Sets the Ti constant in the PID regulator.
  Parameter: <Value in the range [-65535.0, 65535.0]>
  */
-static const char SET_PID_KI[]      = "set ki";
+static const char SET_PID_KI[]      = "set Ti";
 
 /*§
- Sets the Kd constant in the PID regulator.
+ Sets the Td constant in the PID regulator.
  Parameter: <Value in the range [-65535.0, 65535.0]>
  */
-static const char SET_PID_KD[]      = "set kd";
+static const char SET_PID_KD[]      = "set Td";
 
 /*§
  Sets the integrator tracking time constant in the PID regulator.
  Parameter: <Value in the range [0.0, 65535.0]>
  */
-static const char SET_PID_TTR[]     = "set ttr";
+static const char SET_PID_TTR[]     = "set Ttr";
 
 /*§
  Sets the max gain of the PID derivative term.

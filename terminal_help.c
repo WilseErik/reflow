@@ -35,19 +35,19 @@ void terminal_help(char* in)
     {
         uart_write_string("\tGets one byte from the flash data memory.\n\r\tParameter: <index in hex format>\n\r\tReturns: <hex value of byte at specified index>\n\r\t\n\r");
     }
-    else if (NULL != strstr(in, "get kp"))
+    else if (NULL != strstr(in, "get K"))
     {
-        uart_write_string("\tGets the Kp constant in the PID regulator.\n\r\tReturns: <Kp value as  a decimal value>\n\r\t\n\r");
+        uart_write_string("\tGets the K constant in the PID regulator.\n\r\tReturns: <K value as a decimal value>\n\r\t\n\r");
     }
-    else if (NULL != strstr(in, "get ki"))
+    else if (NULL != strstr(in, "get Ti"))
     {
-        uart_write_string("\tGets the Ip constant in the PID regulator.\n\r\tReturns: <Ip value as  a decimal value>\n\r\t\n\r");
+        uart_write_string("\tGets the Ti constant in the PID regulator.\n\r\tReturns: <Ti value as a decimal value>\n\r\t\n\r");
     }
-    else if (NULL != strstr(in, "get kd"))
+    else if (NULL != strstr(in, "get Td"))
     {
-        uart_write_string("\tGets the Dp constant in the PID regulator.\n\r\tReturns: <Dp value as  a decimal value>\n\r\t\n\r");
+        uart_write_string("\tGets the Td constant in the PID regulator.\n\r\tReturns: <Td value as a decimal value>\n\r\t\n\r");
     }
-    else if (NULL != strstr(in, "get ttr"))
+    else if (NULL != strstr(in, "get Ttr"))
     {
         uart_write_string("\tGets the PID integral tracking time constant.\n\r\tReturns: <PID integral tracking time constant>\n\r\t\n\r");
     }
@@ -83,19 +83,19 @@ void terminal_help(char* in)
     {
         uart_write_string("\tSets one byte in the flash data memory.\n\r\tParamter: <index in hex format> <one byte value in hex format>\n\r\t\n\r");
     }
-    else if (NULL != strstr(in, "set kp"))
+    else if (NULL != strstr(in, "set K"))
     {
-        uart_write_string("\tSets the Kp constant in the PID regulator.\n\r\tParameter: <Value in the range [-65535.0, 65535.0]>\n\r\t\n\r");
+        uart_write_string("\tSets the K constant in the PID regulator.\n\r\tParameter: <Value in the range [-65535.0, 65535.0]>\n\r\t\n\r");
     }
-    else if (NULL != strstr(in, "set ki"))
+    else if (NULL != strstr(in, "set Ti"))
     {
-        uart_write_string("\tSets the Ki constant in the PID regulator.\n\r\tParameter: <Value in the range [-65535.0, 65535.0]>\n\r\t\n\r");
+        uart_write_string("\tSets the Ti constant in the PID regulator.\n\r\tParameter: <Value in the range [-65535.0, 65535.0]>\n\r\t\n\r");
     }
-    else if (NULL != strstr(in, "set kd"))
+    else if (NULL != strstr(in, "set Td"))
     {
-        uart_write_string("\tSets the Kd constant in the PID regulator.\n\r\tParameter: <Value in the range [-65535.0, 65535.0]>\n\r\t\n\r");
+        uart_write_string("\tSets the Td constant in the PID regulator.\n\r\tParameter: <Value in the range [-65535.0, 65535.0]>\n\r\t\n\r");
     }
-    else if (NULL != strstr(in, "set ttr"))
+    else if (NULL != strstr(in, "set Ttr"))
     {
         uart_write_string("\tSets the integrator tracking time constant in the PID regulator.\n\r\tParameter: <Value in the range [0.0, 65535.0]>\n\r\t\n\r");
     }
@@ -128,7 +128,7 @@ void terminal_help(char* in)
         uart_write_string("\tType \"help <command>\" for more info\n\r");
         uart_write_string("\tAvailible commands:\n\r");
         uart_write_string("\t------------------------------------\n\r");
-        uart_write_string("\tbuffered write\n\r\tflush flash buffer\n\r\tget d max gain\n\r\tget flash\n\r\tget kd\n\r\tget ki\n\r\tget kp\n\r\tget pid servo factor\n\r\tget start of cool\n\r\tget start of reflow\n\r\tget start of soak\n\r\tget ttr\n\r\thello\n\r\tinit flash bufffer\n\r\tset d max gain\n\r\tset flash\n\r\tset heat pwm\n\r\tset heater\n\r\tset kd\n\r\tset ki\n\r\tset kp\n\r\tset pid servo factor\n\r\tset servo pos\n\r\tset start of cool\n\r\tset start of reflow\n\r\tset start of soak\n\r\tset ttr\n\r\ttemp curve eval\n\r\ttest temp\n\r\t");
+        uart_write_string("\tbuffered write\n\r\tflush flash buffer\n\r\tget K\n\r\tget Td\n\r\tget Ti\n\r\tget Ttr\n\r\tget d max gain\n\r\tget flash\n\r\tget pid servo factor\n\r\tget start of cool\n\r\tget start of reflow\n\r\tget start of soak\n\r\thello\n\r\tinit flash bufffer\n\r\tset K\n\r\tset Td\n\r\tset Ti\n\r\tset Ttr\n\r\tset d max gain\n\r\tset flash\n\r\tset heat pwm\n\r\tset heater\n\r\tset pid servo factor\n\r\tset servo pos\n\r\tset start of cool\n\r\tset start of reflow\n\r\tset start of soak\n\r\ttemp curve eval\n\r\ttest temp\n\r\t");
         uart_write_string("\n\r");
     }
 }
