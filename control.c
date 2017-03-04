@@ -84,6 +84,14 @@ void control_set_td(q16_16_t td)
     bd = q16_16_multiply(q16_16_multiply(K, ad), d_max_gain);
 }
 
+void control_set_ttr(q16_16_t ttr)
+{
+    t_tr = ttr;
+
+    t_tr = ttr;
+    tracking_factor = q16_16_divide(SAMPING_INTEVAL_SEC, t_tr);
+}
+
 q16_16_t control_get_k(void)
 {
     return K;
@@ -103,14 +111,13 @@ void control_init(void)
 {
     integral = 0;
     derivative = 0;
-
-    t_tr = (q16_16_t)flash_read_dword(FLASH_INDEX_TTR);
-    tracking_factor = q16_16_divide(SAMPING_INTEVAL_SEC, t_tr);
+    
     d_max_gain = (q16_16_t)flash_read_dword(FLASH_INDEX_D_MAX_GAIN);
 
     control_set_k((q16_16_t)flash_read_dword(FLASH_INDEX_K));
     control_set_ti((q16_16_t)flash_read_dword(FLASH_INDEX_TI));
     control_set_td((q16_16_t)flash_read_dword(FLASH_INDEX_TD));
+    control_set_ttr((q16_16_t)flash_read_dword(FLASH_INDEX_TTR));
 
     initialized = true;
 }
@@ -135,7 +142,17 @@ void control_update_pid(q16_16_t current_reading)
         //
         // Calculate PID output
         //
-        pid_result = q16_16_multiply(K, error) + integral + derivative;
+        pid_result = q16_16_multiply(K, error);
+        
+        if ((0 != t_i) && (0 != t_tr))
+        {
+            pid_result += integral;
+        }
+        
+        if (0 != t_d)
+        {
+            pid_result += derivative;
+        }
 
         //
         // Calculate restricted output value
