@@ -34,7 +34,7 @@
 #define BACKSPACE_CHAR  (0x08)
 
 static const uint32_t UART_BAUD = 9600;
-static const uint32_t PERIPHERAL_FREQ = 16000000;
+static const uint32_t PERIPHERAL_FREQ = STATUS_PERIPHERAL_FREQ;
 
 static const uint8_t COMMAND_TERMINATION_CHAR = '\n';
 

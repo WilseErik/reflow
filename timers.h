@@ -54,7 +54,7 @@ void timers_deactivate_heater_control(void);
  * @breif Sets the duty cycle of the heater element.
  * @param duty - Duty cycle in range [0, 50].
  */
-void timers_set_heater_duty(uint8_t duty);
+void timers_set_heater_duty(uint16_t duty);
 
 /**
  * @breif Gets the duty cycle of the heater element.

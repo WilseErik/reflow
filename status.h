@@ -70,6 +70,8 @@ extern volatile status_item_t status_bytes[STATUS_BYTE_LAST];
 // Global constatants
 // =============================================================================
 
+#define STATUS_PERIPHERAL_FREQ 4000000
+
 // =============================================================================
 // Public function declarations
 // =============================================================================

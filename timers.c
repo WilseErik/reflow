@@ -31,7 +31,7 @@
 // HW constants
 //
 
-static uint32_t TIMER_CLOCK_FREQ_HZ = 16000000;
+static uint32_t TIMER_CLOCK_FREQ_HZ = STATUS_PERIPHERAL_FREQ;
 static uint32_t MSEC_TIMER_FREQ_HZ = 1000;
 
 
@@ -150,7 +150,7 @@ void timers_deactivate_heater_control(void)
     heater_control_on = false;
 }
 
-void timers_set_heater_duty(uint8_t duty)
+void timers_set_heater_duty(uint16_t duty)
 {
     if (duty <= 50)
     {

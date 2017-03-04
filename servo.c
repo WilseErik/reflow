@@ -40,6 +40,7 @@
 #include <xc.h>
 
 #include "gpio.h"
+#include "status.h"
 
 // =============================================================================
 // Private type definitions
@@ -53,7 +54,7 @@
 // Private constants
 // =============================================================================
 
-#define TIMER_CLOCK_FREQ_HZ 16000000
+#define TIMER_CLOCK_FREQ_HZ STATUS_PERIPHERAL_FREQ
 #define SERVO_INTERVAL_HZ 50
 #define PULSE_WIDTH_MAX_US 2100
 #define PULSE_WIDTH_MIN_US 900
