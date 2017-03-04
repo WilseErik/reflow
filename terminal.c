@@ -1036,6 +1036,8 @@ static void set_pid_ttr(void)
         flash_init_write_buffer();
         flash_write_dword_to_buffer(FLASH_INDEX_TTR, (uint32_t)factor);
         flash_write_buffer_to_flash();
+
+        control_set_ttr(factor);
     }
 }
 
