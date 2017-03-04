@@ -41,16 +41,22 @@ extern "C" {
 void control_set_k(q16_16_t k);
 
 /**
- * @brief Sets the integral part of the PID regulator.
- * @param ki - integral part to set.
+ * @brief Sets the integral time constant of the PID regulator.
+ * @param ki - integral time constant to set.
  */
 void control_set_ti(q16_16_t ti);
 
 /**
- * @brief Sets the derivate part of the PID regulator.
- * @param kd - derivate part to set.
+ * @brief Sets the derivate time constant of the PID regulator.
+ * @param kd - derivate time constant to set.
  */
 void control_set_td(q16_16_t td);
+
+/**
+ * @brief Sets the integral tracking time constant of the PID regulator.
+ * @param kd - time constant to set.
+ */
+void control_set_ttr(q16_16_t ttr);
 
 /**
  * @brief Gets the P part of the PID regulator.
