@@ -135,7 +135,7 @@ void control_update_pid(q16_16_t current_reading)
         //
         // Calculate PID output
         //
-        pid_result = K * error + integral + derivative;
+        pid_result = q16_16_multiply(K, error) + integral + derivative;
 
         //
         // Calculate restricted output value
