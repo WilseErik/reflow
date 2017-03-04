@@ -236,7 +236,7 @@ uint32_t flash_read_dword(flash_index_t index)
     uint32_t dword = 0x00000000;
 
     dword |= ((uint32_t)flash_read_word(index) << 16) & (uint32_t)0xFFFF0000;
-    dword |=  (uint32_t)flash_read_word(index)        & (uint32_t)0x0000FFFF;
+    dword |=  (uint32_t)flash_read_word(index + 2)    & (uint32_t)0x0000FFFF;
 
     return dword;
 }
