@@ -150,6 +150,7 @@ matrix_t * matrix_mult(const matrix_t * a, const matrix_t * b, matrix_t * prod)
 {
     const uint16_t r_max = prod->rows;
     const uint16_t c_max = prod->cols;
+    const uint16_t e_max = a->cols;
     uint16_t r;
     uint16_t c;
     uint16_t e;
@@ -172,10 +173,11 @@ matrix_t * matrix_mult(const matrix_t * a, const matrix_t * b, matrix_t * prod)
         for (c = 0; c != c_max; ++c)
         {
             uint16_t row_offset = r * c_max;
+            uint16_t a_row_offset = r * e_max;
 
-            for (e = 0; e != r_max; ++e)
+            for (e = 0; e != e_max; ++e)
             {
-                q16_16_t item_prod = q16_16_multiply(*(a_mat + row_offset + e),
+                q16_16_t item_prod = q16_16_multiply(*(a_mat + a_row_offset + e),
                                                      *(b_mat + e * c_max + c));
                 *(prod_mat + row_offset + c) += item_prod;
             }
