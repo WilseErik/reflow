@@ -20,6 +20,7 @@ extern "C" {
 // Include statements
 // =============================================================================
 #include <stdint.h>
+#include <limits.h>
 
 // =============================================================================
 // Public type definitions
@@ -35,7 +36,9 @@ typedef int32_t q16_16_t;
 // =============================================================================
 // Global constatants
 // =============================================================================
-#define Q16_16_T_ONE    (0x00010000)
+#define Q16_16_T_ONE    (0x00010000L)
+#define Q16_16_MAX      (INT32_MAX)
+#define Q16_16_MIN      (INT32_MIN)
 
 // =============================================================================
 // Global variable declarations
@@ -44,6 +47,13 @@ typedef int32_t q16_16_t;
 // =============================================================================
 // Public function declarations
 // =============================================================================
+
+/**
+ * @brief Calculates the base 2 logarithm of x.
+ * @param x - function parameter.
+ * @return base 2 logarithm of x.
+ */
+q16_16_t q16_16_log(q16_16_t x);
 
 /**
  * @brief Calculates the product of two q16_16_t numbers.

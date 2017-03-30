@@ -26,7 +26,7 @@ typedef enum
     READ_STATE_READING_IC_2,
 } max6675_read_state_t;
 
-#define FILTER_BUFFER_SIZE 256
+#define FILTER_BUFFER_SIZE 64
 typedef struct
 {
     volatile uint16_t latest;

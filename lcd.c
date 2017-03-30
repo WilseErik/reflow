@@ -39,7 +39,7 @@ typedef struct lcd_instr_t
     bool valid;
 } lcd_instr_t;
 
-#define TASK_QUEUE_SIZE 100
+#define TASK_QUEUE_SIZE 50
 
 /*
  * To send commands to the LCD, list all the commands in a queue and
