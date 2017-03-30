@@ -72,6 +72,7 @@ class Cmd_parser:
                     print("    else if (NULL != strstr(in, \"" + cmd.cmd + "\"))", file=f)
                 print("    {", file=f)
                 print("        uart_write_string(\"\\t" + cmd.doc + "\\n\\r\");", file=f)
+                print("        while (!uart_is_write_buffer_empty()){;}", file=f)
                 print("    }", file=f)
 
             print("    else", file=f)
@@ -88,9 +89,16 @@ class Cmd_parser:
             commands_string += '"'
 
             print("        uart_write_string(\"\\tType \\\"help <command>\\\" for more info\\n\\r\");", file=f)
+            print("        while (!uart_is_write_buffer_empty()){;}", file=f)
             print("        uart_write_string(\"\\tAvailible commands:\\n\\r\");", file=f)
-            print("        uart_write_string(\"\\t------------------------------------\\n\\r\");", file=f)
-            print("        uart_write_string(" + commands_string + ');', file=f)
+            print("        while (!uart_is_write_buffer_empty()){;}", file=f)
+            print("        uart_write_string(\"\\t------------------------------------\\n\\r\\t\");", file=f)
+            print("        while (!uart_is_write_buffer_empty()){;}", file=f)
+            
+            for line in commands_list:
+                print('        uart_write_string("' + line + '");', file=f)
+                print("        while (!uart_is_write_buffer_empty()){;}", file=f)
+
             print("        uart_write_string(\"\\n\\r\");", file=f)
             print("    }", file=f)
             print("}", file=f)

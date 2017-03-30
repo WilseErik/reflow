@@ -45,7 +45,7 @@ static const char CMD_TYPE_GET[]    = "get ";
 static const char SYNTAX_ERROR[]    = "[Syntax error]";
 static const char ARGUMENT_ERROR[]  = "[Invalid argument]";
 
-#define CMD_BUFFER_SIZE 1025
+#define CMD_BUFFER_SIZE 257
 
 //
 // Commands

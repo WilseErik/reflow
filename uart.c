@@ -30,7 +30,7 @@
 // =============================================================================
 // Private constants
 // =============================================================================
-#define BUFFER_SIZE     ((uint16_t)1024)
+#define BUFFER_SIZE     ((uint16_t)256)
 #define BACKSPACE_CHAR  (0x08)
 
 static const uint32_t UART_BAUD = 9600;
