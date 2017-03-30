@@ -93,29 +93,19 @@ static void run_next_in_queue(void);
 
 static void queue_instr_clear_display(void);
 
-static void queue_instr_return_home(void);
-
 static void queue_instr_entry_mode_set(bool i_d, bool s);
 
 static void queue_instr_display_on_off(bool disp_on,
                                         bool cursor_on,
                                         bool cursor_pos_on);
 
-static void queue_instr_disp_shift(bool s_c, bool r_l);
-
 static void queue_instr_function_set(bool use_8_bit_interface,
                                       bool use_2_lines,
                                       bool font_size_5_11);
 
-static void queue_instr_set_cgram_addr(uint8_t addr);
-
 static void queue_instr_set_ddram_addr(uint8_t addr);
 
-static void queue_instr_read_busy_flag(void);
-
 static void queue_instr_write_data_to_ram(uint8_t data);
-
-static void queue_instr_read_data_from_ram(void);
 
 //
 // Time
@@ -310,32 +300,6 @@ static void queue_instr_clear_display(void)
 /*
  * Reference: Instruction described in ST7066U datasheet page 17
  */
-static void queue_instr_return_home(void)
-{
-    uint16_t next = task_queue.last;
-
-    if (task_queue.tasks[next].valid)
-    {
-        ++next;
-    }
-
-    if (TASK_QUEUE_SIZE == next)
-    {
-        next = 0;
-    }
-
-    task_queue.tasks[next].rs = false;
-    task_queue.tasks[next].rw = false;
-    task_queue.tasks[next].db = 0x02;
-    task_queue.tasks[next].wait_us = 2000;
-    task_queue.tasks[next].valid = true;
-
-    task_queue.last = next;
-}
-
-/*
- * Reference: Instruction described in ST7066U datasheet page 17
- */
 static void queue_instr_entry_mode_set(bool i_d, bool s)
 {
     uint16_t next = task_queue.last;
@@ -404,38 +368,6 @@ static void queue_instr_display_on_off(bool disp_on,
 /*
  * Reference: Instruction described in ST7066U datasheet page 17
  */
-static void queue_instr_disp_shift(bool s_c, bool r_l)
-{
-    uint16_t next = task_queue.last;
-
-    if (task_queue.tasks[next].valid)
-    {
-        ++next;
-    }
-
-    if (TASK_QUEUE_SIZE == next)
-    {
-        next = 0;
-    }
-
-    task_queue.tasks[next].rs = false;
-    task_queue.tasks[next].rw = false;
-    task_queue.tasks[next].db = 0x10;
-
-    if (s_c)
-        task_queue.tasks[next].db |= 0x08;
-    if (r_l)
-        task_queue.tasks[next].db |= 0x04;
-
-    task_queue.tasks[next].wait_us = 50;
-    task_queue.tasks[next].valid = true;
-
-    task_queue.last = next;
-}
-
-/*
- * Reference: Instruction described in ST7066U datasheet page 17
- */
 static void queue_instr_function_set(bool use_8_bit_interface,
                                       bool use_2_lines,
                                       bool font_size_5_11)
@@ -472,32 +404,6 @@ static void queue_instr_function_set(bool use_8_bit_interface,
 /*
  * Reference: Instruction described in ST7066U datasheet page 17
  */
-static void queue_instr_set_cgram_addr(uint8_t addr)
-{
-    uint16_t next = task_queue.last;
-
-    if (task_queue.tasks[next].valid)
-    {
-        ++next;
-    }
-
-    if (TASK_QUEUE_SIZE == next)
-    {
-        next = 0;
-    }
-
-    task_queue.tasks[next].rs = false;
-    task_queue.tasks[next].rw = false;
-    task_queue.tasks[next].db = 0x40 | (addr & 0x3F);
-    task_queue.tasks[next].wait_us = 50;
-    task_queue.tasks[next].valid = true;
-
-    task_queue.last = next;
-}
-
-/*
- * Reference: Instruction described in ST7066U datasheet page 17
- */
 static void queue_instr_set_ddram_addr(uint8_t addr)
 {
     uint16_t next = task_queue.last;
@@ -521,36 +427,6 @@ static void queue_instr_set_ddram_addr(uint8_t addr)
     task_queue.last = next;
 }
 
-/*
- * Reference: Instruction described in ST7066U datasheet page 17
- */
-static void queue_instr_read_busy_flag(void)
-{
-    uint16_t next = task_queue.last;
-
-    if (task_queue.tasks[next].valid)
-    {
-        ++next;
-    }
-
-    if (TASK_QUEUE_SIZE == next)
-    {
-        next = 0;
-    }
-
-    task_queue.tasks[next].rs = false;
-    task_queue.tasks[next].rw = true;
-    task_queue.tasks[next].db = 0;
-    task_queue.tasks[next].wait_us = 0;
-    task_queue.tasks[next].valid = true;
-
-    task_queue.last = next;
-
-    lcd_instr_t i;
-    i.rs = false;
-    i.rw = true;
-    i.db = 0x00;
-}
 
 /*
  * Reference: Instruction described in ST7066U datasheet page 17
@@ -577,34 +453,6 @@ static void queue_instr_write_data_to_ram(uint8_t data)
 
     task_queue.last = next;
 }
-
-/*
- * Reference: Instruction described in ST7066U datasheet page 17
- */
-static void queue_instr_read_data_from_ram(void)
-{
-    uint16_t next = task_queue.last;
-
-    if (task_queue.tasks[next].valid)
-    {
-        ++next;
-    }
-
-    if (TASK_QUEUE_SIZE == next)
-    {
-        next = 0;
-    }
-
-    task_queue.tasks[next].rs = true;
-    task_queue.tasks[next].rw = true;
-    task_queue.tasks[next].db = 0x00;
-    task_queue.tasks[next].wait_us = 50;
-    task_queue.tasks[next].valid = true;
-
-    task_queue.last = next;
-}
-
-
 
 //
 // Time
