@@ -159,6 +159,9 @@ matrix_t * matrix_mult(const matrix_t * a, const matrix_t * b, matrix_t * prod)
     q16_16_t * b_mat = b->m;
     q16_16_t * prod_mat = prod->m;
 
+    uint16_t row_offset = 0;
+    uint16_t a_row_offset = 0;
+
     if ((a->cols != b->rows) ||
         (a->rows != prod->rows) || (b->cols != prod->cols))
     {
@@ -172,16 +175,20 @@ matrix_t * matrix_mult(const matrix_t * a, const matrix_t * b, matrix_t * prod)
     {
         for (c = 0; c != c_max; ++c)
         {
-            uint16_t row_offset = r * c_max;
-            uint16_t a_row_offset = r * e_max;
+            uint16_t e_times_c_max = 0;
 
             for (e = 0; e != e_max; ++e)
             {
                 q16_16_t item_prod = q16_16_multiply(*(a_mat + a_row_offset + e),
-                                                     *(b_mat + e * c_max + c));
+                                                     *(b_mat + e_times_c_max + c));
                 *(prod_mat + row_offset + c) += item_prod;
+
+                e_times_c_max += c_max;
             }
         }
+
+        row_offset += c_max;
+        a_row_offset += e_max;
     }
 
     return prod;
@@ -217,83 +224,105 @@ matrix_t * matrix_transpose(const matrix_t * m, matrix_t * result)
 }
 
 matrix_t * matrix_mult_l_transpose(const matrix_t * a, const matrix_t * b,
-        matrix_t * result)
+        matrix_t * prod)
 {
-    const uint16_t r_max = result->rows;
-    const uint16_t c_max = result->cols;
+    const uint16_t r_max = prod->rows;
+    const uint16_t c_max = prod->cols;
+    const uint16_t e_max = a->rows;
     uint16_t r;
     uint16_t c;
     uint16_t e;
 
     q16_16_t * a_mat = a->m;
     q16_16_t * b_mat = b->m;
-    q16_16_t * prod_mat = result->m;
+    q16_16_t * prod_mat = prod->m;
+
+    uint16_t row_offset = 0;
 
     if ((a->rows != b->rows) ||
-        (a->cols != result->rows) || (b->cols != result->cols))
+        (a->cols != prod->rows) || (b->cols != prod->cols))
     {
         matrix_op_err(__func__);
         return  NULL;
     }
 
-    matrix_zero(result);
+    matrix_zero(prod);
 
     for (r = 0; r != r_max; ++r)
     {
         for (c = 0; c != c_max; ++c)
         {
-            uint16_t row_offset = r * c_max;
+            uint16_t e_times_c_max = 0;
+            uint16_t e_times_r_max = 0;
 
-            for (e = 0; e != r_max; ++e)
+            for (e = 0; e != e_max; ++e)
             {
-                q16_16_t item_prod = q16_16_multiply(*(a_mat + e * c_max + r),
-                                                     *(b_mat + e * c_max + c));
+                q16_16_t item_prod = q16_16_multiply(*(a_mat + e_times_r_max + r),
+                                                     *(b_mat + e_times_c_max + c));
                 *(prod_mat + row_offset + c) += item_prod;
+
+                e_times_c_max += c_max;
+                e_times_r_max += r_max;
             }
         }
+
+        row_offset += c_max;
     }
 
-    return result;
+    return prod;
 }
 
 matrix_t * matrix_mult_r_transpose(const matrix_t * a, const matrix_t * b,
-        matrix_t * result)
+        matrix_t * prod)
 {
-    const uint16_t r_max = result->rows;
-    const uint16_t c_max = result->cols;
+    const uint16_t r_max = prod->rows;
+    const uint16_t c_max = prod->cols;
+    const uint16_t e_max = a->cols;
     uint16_t r;
     uint16_t c;
     uint16_t e;
 
     q16_16_t * a_mat = a->m;
     q16_16_t * b_mat = b->m;
-    q16_16_t * prod_mat = result->m;
+    q16_16_t * prod_mat = prod->m;
+
+    uint16_t row_offset = 0;
+    uint16_t a_row_offset = 0;
 
     if ((a->cols != b->cols) ||
-        (a->rows != result->rows) || (b->rows != result->cols))
+        (a->rows != prod->rows) || (b->rows != prod->cols))
     {
         matrix_op_err(__func__);
         return  NULL;
     }
 
-    matrix_zero(result);
+    matrix_zero(prod);
 
     for (r = 0; r != r_max; ++r)
     {
+        uint16_t c_times_e_max = 0;
+        
         for (c = 0; c != c_max; ++c)
         {
-            uint16_t row_offset = r * c_max;
+            uint16_t e_times_c_max = 0;
 
-            for (e = 0; e != r_max; ++e)
+            for (e = 0; e != e_max; ++e)
             {
-                q16_16_t item_prod = q16_16_multiply(*(a_mat + row_offset + e),
-                                                     *(b_mat + c * c_max + e));
+                q16_16_t item_prod = q16_16_multiply(*(a_mat + a_row_offset + e),
+                                                     *(b_mat + c_times_e_max + e));
                 *(prod_mat + row_offset + c) += item_prod;
+
+                e_times_c_max += c_max;
             }
+
+            c_times_e_max += e_max;
         }
+
+        row_offset += c_max;
+        a_row_offset += e_max;
     }
 
-    return result;
+    return prod;
 }
 
 matrix_t * matrix_mult_elements(const matrix_t * m, q16_16_t factor,
